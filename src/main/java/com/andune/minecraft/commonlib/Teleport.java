@@ -40,7 +40,6 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
-import org.morganm.mBukkitLib.Logger;
 
 /** General purpose teleportation routines.
  * 

@@ -43,16 +43,14 @@
     <dependency>
       <groupId>org.bukkit</groupId>
       <artifactId>bukkit</artifactId>
-      <version>1.3.1-R1.0</version>
+      <version>1.4.6-R0.3</version>
     </dependency>
 
-<!--
     <dependency>
       <groupId>com.andune.minecraft.commonlib</groupId>
       <artifactId>commonlib</artifactId>
       <version>0.4-SNAPSHOT</version>
     </dependency>
--->
 
     <dependency>
       <groupId>com.google.inject</groupId>
@@ -179,13 +177,10 @@
                 <includes>
                   <include>javax.inject:javax.inject</include>
                   <include>aopalliance:aopalliance</include>
-                  <include>com.sk89q:worldedit</include>
-                  <include>net.milkbowl.vault:Vault</include>
-                  <include>com.nijiko:permissions</include>
-                  <include>ru.tehkode:PermissionsEx</include>
                 </includes>
               </artifactSet>
 
+<!--
               <filters>
                 <filter>
                   <artifact>com.sk89q:worldedit</artifact>
@@ -214,6 +209,7 @@
                   </includes>
                 </filter>
               </filters>
+-->
 
 <!--
               <relocations>
