@@ -31,7 +31,6 @@
 package com.andune.minecraft.commonlib;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -46,7 +45,6 @@ import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
  * @author morganm
  *
  */
-@Singleton
 public class Teleport {
 	public static final int FLAG_NO_WATER = 0x01; 
 	public static final int FLAG_NO_LILY_PAD = 0x02; 
@@ -158,7 +156,7 @@ public class Teleport {
 				return false;
 			}
 
-			log.devDebug("isSafeBlock() block is safe b=",b,", up=",up,", down=",down);
+			log.debug("isSafeBlock() block is safe b={}, up={}, down={}", b, up, down);
 			
 			// if we make it here, we've made it through all hazardous checks
 			// so the block is considered safe to teleport to
@@ -172,7 +170,8 @@ public class Teleport {
 	private Location findSafeLocation2(final Location baseLocation, final int level,
 			final Bounds bounds, final int flags)
 	{
-		log.devDebug("findSafeLocation2(): level=",level,", baseLocation=",baseLocation,", flags=",flags);
+		log.debug("findSafeLocation2(): level={}, baseLocation={}, flags={}",
+		        level, baseLocation, flags);
 		final World w = baseLocation.getWorld();
 		final int baseX = baseLocation.getBlockX();
 		final int baseY = baseLocation.getBlockY();
@@ -190,8 +189,8 @@ public class Teleport {
 		if( maxY > bounds.maxY )
 			maxY = bounds.maxY;
 		
-		log.devDebug("findSafeLocation2(): bounds.maxY=",bounds.maxY,", bounds.minY=",bounds.minY);
-		log.devDebug("findSafeLocation2(): maxY=",maxY,", minY=",minY);
+		log.debug("findSafeLocation2(): bounds.maxY={}, bounds.minY={}", bounds.maxY, bounds.minY);
+		log.debug("findSafeLocation2(): maxY={}, minY={}", maxY, minY);
 		
 		long startTime = System.currentTimeMillis();
 		int checkedBlocks=0;
@@ -210,11 +209,11 @@ public class Teleport {
 						// if it's the original location, return it untouched so we preserve
 						// the exact coordinates, pitch, yaw, etc
 						if( level == 0 && x == 0 && y == 0 && z == 0 ) {
-							log.devDebug("findSafeLocation2(): found safe block (original location) ",b);
+							log.debug("findSafeLocation2(): found safe block (original location) {}",b);
 							return baseLocation;
 						}
 						else {
-							log.devDebug("findSafeLocation2(): found safe block ",b);
+							log.debug("findSafeLocation2(): found safe block {}",b);
 							return b.getLocation();
 						}
 					}
@@ -224,7 +223,8 @@ public class Teleport {
 		}
 		
 		long totalTime = System.currentTimeMillis() - startTime;
-		log.devDebug("findSafeLocation2(): no safe location found at level ",level,", checked ",checkedBlocks," total blocks. Recursing to next level. (total time = ",totalTime,")");
+		log.debug("findSafeLocation2(): no safe location found at level {}, checked {} total blocks. Recursing to next level. (total time = {})",
+		        level, checkedBlocks, totalTime);
 		
 		// we only recurse so far before we give up
 		if( level+1 > bounds.maxRange ) {
@@ -239,10 +239,11 @@ public class Teleport {
 			// since this can only be true once.
 	    	Location highest = w.getHighestBlockAt(baseLocation).getLocation();
 	    	if( highest.getY() > maxY || highest.getY() < minY ) {
-				log.devDebug("findSafeLocation2(): hit maximum recursion distance ",bounds.maxRange,", moving to highest Y-block at ",highest.getY()," and trying again");
+				log.debug("findSafeLocation2(): hit maximum recursion distance {}, moving to highest Y-block at {} and trying again",
+				        bounds.maxRange, highest.getY());
 				return findSafeLocation2(highest, 0, bounds, flags);
 	    	}
-			log.devDebug("findSafeLocation2(): hit maximum recursion distance ",bounds.maxRange,", returning null");
+			log.debug("findSafeLocation2(): hit maximum recursion distance {}, returning null", bounds.maxRange);
 			return null;
 		}
 		
@@ -360,10 +361,10 @@ public class Teleport {
 					target.setZ(target.getZ()+0.5);
 //				else
 //					target.setZ(target.getZ()-0.5);
-				log.devDebug("adjusted coordinates to middle. x=",target.getX(),", z=",target.getZ());
+				log.debug("adjusted coordinates to middle. x={}, z={}", target.getX(), target.getZ());
 			}
 			else
-				log.devDebug("safeLocation(): original location is safe");
+				log.debug("safeLocation(): original location is safe");
 		}
 		else
 			log.info("safeLocation: couldn't find nearby safe location, using original location "+l);

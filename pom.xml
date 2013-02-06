@@ -5,7 +5,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.andune.minecraft.commonlib</groupId>
   <artifactId>commonBukkitlib</artifactId>
-  <version>0.4-SNAPSHOT</version>
+  <version>0.4</version>
   <name>commonBukkitlib</name>
   <description>commonBukkitlib is a library of Bukkit-specific classes for use Andune's MineCraft plugins</description>
 
@@ -56,19 +56,6 @@
       <groupId>com.google.inject</groupId>
       <artifactId>guice</artifactId>
       <version>3.0</version>
-    </dependency>
-
-    <!-- SLF4J Logging API -->
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-      <version>1.7.2</version>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-jdk14</artifactId>
-      <version>1.7.2</version>
-      <scope>test</scope>
     </dependency>
 
     <!-- Permissions components -->
@@ -176,10 +163,20 @@
               <artifactSet>
                 <includes>
                   <include>javax.inject:javax.inject</include>
+<!--
                   <include>aopalliance:aopalliance</include>
+-->
                 </includes>
               </artifactSet>
 
+              <filters>
+                <filter>
+                  <artifact>javax.inject:javax.inject</artifact>
+                  <includes>
+                    <include>javax/inject/Inject.class</include>
+                  </includes>
+                </filter>
+              </filters>
 <!--
               <filters>
                 <filter>
@@ -211,14 +208,6 @@
               </filters>
 -->
 
-<!--
-              <relocations>
-                <relocation>
-                  <pattern>org.slf4j</pattern>
-                  <shadedPattern>${groupId}.slf4j</shadedPattern>
-                </relocation>
-              </relocations>
--->
             </configuration>
           </execution>
         </executions>

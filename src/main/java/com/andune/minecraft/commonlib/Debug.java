@@ -47,14 +47,10 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginLogger;
 
 /**
- * @deprecated use slf4j.debug
- * 
  * @author morganm
  *
  */
 public class Debug {
-	// class version: 7
-	
 	/* pluginLog always points to the main logger for the plugin.
 	 * 
 	 */
@@ -70,7 +66,11 @@ public class Debug {
 	private boolean debug = false;
 	private Level oldConsoleLevel = null;
 	private Level oldLogLevel = null;
-	
+
+	/**
+	 * @deprecated use slf4j.debug
+	 *
+	 */
 	@Inject
 	public Debug(Plugin plugin, Logger log) {
 		this.pluginLog = log;

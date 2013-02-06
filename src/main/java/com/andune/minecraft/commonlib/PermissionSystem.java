@@ -33,13 +33,11 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 import net.milkbowl.vault.permission.Permission;
 
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permissible;
@@ -69,7 +67,6 @@ import com.sk89q.wepif.PermissionsResolverManager;
  * @author morganm
  *
  */
-@Singleton
 public class PermissionSystem {
 	public enum Type {
 		SUPERPERMS,
@@ -188,7 +185,7 @@ public class PermissionSystem {
      * @param permission the permission to be checked
      * @return true if the player has the permission, false if not
      */
-    public boolean has(CommandSender sender, String permission) {
+    public boolean has(Permissible sender, String permission) {
     	Player p = null;
     	// console always has access
     	if( sender instanceof ConsoleCommandSender )
