@@ -30,7 +30,6 @@ package com.andune.minecraft.commonlib;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
 
 import javax.inject.Inject;
 
@@ -48,24 +47,21 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 import com.sk89q.wepif.PermissionsResolver;
 import com.sk89q.wepif.PermissionsResolverManager;
 
-/** Permission abstraction class, use Vault, WEPIF, Perm2 or superperms, depending on what's available.
+/**
+ * Permission abstraction class, use Vault, WEPIF or superperms, depending on
+ * what's available.
  * 
- * Dependencies: (handled through maven automatically now)
- *   Vault 1.x: http://dev.bukkit.org/server-mods/vault/
- *   WorldEdit 5.x: http://build.sk89q.com/
- *   PermissionsEx: http://goo.gl/jthCz
- *   Permissions 2.7 or 3.x: http://goo.gl/liHFt (2.7) or http://goo.gl/rn4LP (3.x) 
- *   
- * Author's note: The "ideal" design would be to setup an interface class and let each permission
- *   type implement that interface and use polymorphism. In fact, that's how Vault and WEPIF work.
- *   However, the design goal for this class is to have a single class I can use between projects
- *   that implements permissions abstraction, thus the less-than-great C-style integer values,
- *   switch statements and if/else ladders.
- *   
- *   Now that I'm moving this into its own library, it should be refactored.
+ * Author's note: The "ideal" design would be to setup an interface class and
+ * let each permission type implement that interface and use polymorphism. In
+ * fact, that's how Vault and WEPIF work. However, the design goal for this
+ * class is to have a single class I can use between projects that implements
+ * permissions abstraction, thus the less-than-great C-style integer values,
+ * switch statements and if/else ladders.
  * 
- * @author morganm
- *
+ * Now that I'm moving this into its own library, it should be refactored.
+ * 
+ * @author andune
+ * 
  */
 public class PermissionSystem {
 	public enum Type {
@@ -85,13 +81,17 @@ public class PermissionSystem {
 	
     private net.milkbowl.vault.permission.Permission vaultPermission = null;
     private PermissionsResolver wepifPerms = null;
-    
+
     @Inject
 	public PermissionSystem(Plugin plugin, Logger log) {
 		this.plugin = plugin;
 		this.log = log;
 	}
-	
+    public PermissionSystem(Plugin plugin, java.util.logging.Logger log) {
+        this.plugin = plugin;
+        this.log = new LoggerJUL(log);
+    }
+
 	public Type getSystemInUse() { return systemInUse; }
 	
 	public String getSystemInUseString() {
@@ -119,7 +119,6 @@ public class PermissionSystem {
 		case SUPERPERMS:
 		default:
 			return "SUPERPERMS";
-		
 		}
 	}
 	
@@ -174,17 +173,27 @@ public class PermissionSystem {
      * @return true if the player has the permission, false if not
      */
     public boolean has(Permissible sender, String permission) {
+        log.debug("has() sender={}, permission={}", sender, permission);
+
     	Player p = null;
     	// console always has access
-    	if( sender instanceof ConsoleCommandSender )
+    	if( sender instanceof ConsoleCommandSender ) {
+            log.debug("has() ConsoleCommandSender=true");
     		return true;
+    	}
     	if( sender instanceof Player )
     		p = (Player) sender;
     	
-    	if( p == null )
+    	log.debug("has() p={}", p);
+    	
+    	if( p == null ) {
+            log.debug("has() p=null, returning false");
     		return false;
-    	else if( p.isOp() )    // legacy op check, op always has access
+    	}
+    	else if( p.isOp() ) {  // legacy op check, op always has access
+            log.debug("has() p.isOp=true, returning true");
             return true;
+    	}
     	
     	boolean permAllowed = false;
     	switch(systemInUse) {
@@ -199,6 +208,7 @@ public class PermissionSystem {
     		break;
     	}
     	
+        log.debug("has() permAllowed={}", permAllowed);
     	return permAllowed;
     }
     
