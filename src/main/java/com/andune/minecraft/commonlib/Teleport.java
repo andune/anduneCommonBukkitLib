@@ -93,8 +93,6 @@ public class Teleport {
 		safeIds[Material.POWERED_RAIL.getId()] = 1;
 		safeIds[Material.DETECTOR_RAIL.getId()] = 1;
 		safeIds[Material.RAILS.getId()] = 1;
-		safeIds[Material.STEP.getId()] = 1;		// half slab
-		safeIds[Material.SNOW.getId()] = 1;
 		safeIds[Material.SIGN_POST.getId()] = 1;
 		safeIds[Material.WALL_SIGN.getId()] = 1;
 	}
@@ -167,12 +165,29 @@ public class Teleport {
 		
 	}
 	
+    /**
+     * This is a recursive routine that checks concentric cubes out from
+     * the original block that is passed in. This has the effect that this
+     * algorithm basically looks for the "nearest" safe block to the
+     * original. 
+     * 
+     * @param baseLocation
+     * @param level
+     * @param bounds
+     * @param flags
+     * @return
+     */
 	private Location findSafeLocation2(final Location baseLocation, final int level,
 			final Bounds bounds, final int flags)
 	{
 		log.debug("findSafeLocation2(): level={}, baseLocation={}, flags={}",
 		        level, baseLocation, flags);
 		final World w = baseLocation.getWorld();
+        if( w == null ) {
+            log.info("Warning: location refers to non-existant world: "+baseLocation);
+            return null;
+        }
+
 		final int baseX = baseLocation.getBlockX();
 		final int baseY = baseLocation.getBlockY();
 		final int baseZ = baseLocation.getBlockZ();
@@ -194,33 +209,49 @@ public class Teleport {
 		
 		long startTime = System.currentTimeMillis();
 		int checkedBlocks=0;
-		for(int x = maxX; x >= minX; x--) {
-			for(int y=maxY; y >= minY; y--) {
-				for(int z=maxZ; z >= minZ; z--) {
-					// we only check the level that we're at, at least one
-					// of the axis must be at the current level
-					if( x != maxX && x != minX
-							&& y != maxY && y != minY 
-							&& z != maxZ && z != minZ )
-						continue;
-					
-					Block b = w.getBlockAt(x, y, z);
-					if( isSafeBlock(b, flags) ) {
-						// if it's the original location, return it untouched so we preserve
-						// the exact coordinates, pitch, yaw, etc
-						if( level == 0 && x == 0 && y == 0 && z == 0 ) {
-							log.debug("findSafeLocation2(): found safe block (original location) {}",b);
-							return baseLocation;
-						}
-						else {
-							log.debug("findSafeLocation2(): found safe block {}",b);
-							return b.getLocation();
-						}
-					}
-					checkedBlocks++;
-				}
-			}
-		}
+        // if this is our first time through the loop, we check the block
+        // itself and one above. This has the effect of making spawns appear
+        // correct when they are set on half-slabs.
+        if( level == 0 ) {
+            Block baseBlock = w.getBlockAt(baseLocation);
+            if( isSafeBlock(baseBlock, flags) ) {
+                log.debug("findSafeLocation2(): found safe block (original location) {}", baseBlock);
+                return baseLocation;
+            }
+            else {
+                Block upBlock = baseBlock.getRelative(BlockFace.UP);
+                if( isSafeBlock(upBlock, flags) ) {
+                    log.debug("findSafeLocation2(): found safe block (UP block) {}", upBlock);
+                    Location l = upBlock.getLocation();
+                    // maintain original pitch/yaw
+                    l.setPitch(baseLocation.getPitch());
+                    l.setYaw(baseLocation.getYaw());
+                    return l;
+                }
+            }
+        }
+        // otherwise we loop through the current cocentric cube
+        else {
+            for(int x = maxX; x >= minX; x--) {
+                for(int y=maxY; y >= minY; y--) {
+                    for(int z=maxZ; z >= minZ; z--) {
+                        // we only check the level that we're at, at least one
+                        // of the axis must be at the current level
+                        if( x != maxX && x != minX
+                                && y != maxY && y != minY 
+                                && z != maxZ && z != minZ )
+                            continue;
+
+                        Block b = w.getBlockAt(x, y, z);
+                        if( isSafeBlock(b, flags) ) {
+                            log.debug("findSafeLocation2(): found safe block {}",b);
+                            return b.getLocation();
+                        }
+                        checkedBlocks++;
+                    }
+                }
+            }
+        }
 		
 		long totalTime = System.currentTimeMillis() - startTime;
 		log.debug("findSafeLocation2(): no safe location found at level {}, checked {} total blocks. Recursing to next level. (total time = {})",
@@ -249,70 +280,6 @@ public class Teleport {
 		
 		return findSafeLocation2(baseLocation, level+1, bounds, flags);
 	}
-	
-	/** Recursively look for 2 vertical safe air spots nearest the given location.
-	 * 
-	 * @param base
-	 */
-	/*
-	private Location findSafeLocation(final Set<Location> alreadyTraversed, final int level, final Location location) {
-		log.devDebug("findSafeLocation(): level=",level,", location=",location);
-
-		// okTraverse tracks block that we check at this level that it's OK
-		// to traverse into for this pass.
-		ArrayList<Location> okTraverse = new ArrayList<Location>(3);
-		
-		if( location == null )
-			return null;
-		final Block base = location.getBlock();
-
-		final boolean blockAlreadyTraversed = alreadyTraversed.contains(location);
-		log.devDebug("findSafeLocation(): blockAlreadyTraversed=",blockAlreadyTraversed);
-		
-		if( !blockAlreadyTraversed && isSafeBlock(base, 0) ) {
-			log.devDebug("findSafeLocation(): isSafeBlock(location)=true, returning");
-			return location;
-		}
-		
-		// first try all the closest blocks before recursing further
-		for(int i=0; i < directions.length; i++) {
-			Block tryBlock = base.getRelative(directions[i]);
-			Location tryLocation = tryBlock.getLocation();
-			if( alreadyTraversed.contains(tryLocation) ) {
-				continue;
-			}
-			okTraverse.add(tryLocation);
-			alreadyTraversed.add(tryLocation);
-
-			if( isSafeBlock(tryBlock, 0) ) {
-				log.devDebug("findSafeLocation(): found safeBlock at ",tryBlock);
-				return tryLocation;
-			}
-		}
-
-		// we only recurse so far before we give up
-		if( level > 10 ) {
-			log.devDebug("findSafeLocation(): hit maximum recursion, returning null");
-			return null;
-		}
-
-		// if we're here, none of them were safe, now recurse
-		for(int i=0; i < directions.length; i++) {
-			Location recurseLocation = base.getRelative(directions[i]).getLocation();
-			if( alreadyTraversed.contains(recurseLocation) && !okTraverse.contains(recurseLocation) )
-				continue;
-			alreadyTraversed.add(recurseLocation);
-
-			Location result = findSafeLocation(alreadyTraversed, level+1, recurseLocation);
-			if( result != null ) {
-				log.devDebug("findSafeLocation(): found safe location through recursion at ",result);
-				return result;
-			}
-		}
-		
-		return null;
-	}
-	*/
 	
 	/** Safely teleport a player to a location. Should avoid them being stuck in blocks,
 	 * teleported over lava, etc.
