@@ -71,8 +71,7 @@ public class PermissionSystem {
 	public enum Type {
 		SUPERPERMS,
 		VAULT,
-		WEPIF,
-		OPS
+		WEPIF
 	}
 
 	/** For use by pure superperms systems that have no notion of group, the
@@ -116,8 +115,6 @@ public class PermissionSystem {
 			}
 			
 			return "WEPIF" + wepifPermInUse;
-		case OPS:
-			return "OPS";
 
 		case SUPERPERMS:
 		default:
@@ -138,10 +135,7 @@ public class PermissionSystem {
 			permPrefs = new ArrayList<String>(5);
 			permPrefs.add("vault");
 			permPrefs.add("wepif");
-			permPrefs.add("pex");
-			permPrefs.add("perm2-compat");
 			permPrefs.add("superperms");
-			permPrefs.add("ops");
 		}
 		
 		for(String system : permPrefs) {
@@ -167,12 +161,6 @@ public class PermissionSystem {
 //					log.info(logPrefix+"using Superperms permissions");
 	        	break;
 			}
-			else if( "ops".equalsIgnoreCase(system) ) {
-				systemInUse = Type.OPS;
-//				if( verbose )
-//					log.info(logPrefix+"using basic Op check for permissions");
-	        	break;
-			}
 		}
 		
 		if( verbose )
@@ -195,6 +183,8 @@ public class PermissionSystem {
     	
     	if( p == null )
     		return false;
+    	else if( p.isOp() )    // legacy op check, op always has access
+            return true;
     	
     	boolean permAllowed = false;
     	switch(systemInUse) {
@@ -206,9 +196,6 @@ public class PermissionSystem {
     		break;
     	case SUPERPERMS:
     		permAllowed = p.hasPermission(permission);
-    		break;
-    	case OPS:
-    		permAllowed = p.isOp();
     		break;
     	}
     	
@@ -225,7 +212,6 @@ public class PermissionSystem {
     		permAllowed = wepifPerms.hasPermission(player, permission);
     		break;
     	case SUPERPERMS:
-    	{
     		Player p = plugin.getServer().getPlayer(player);
 			// technically this is not guaranteed to be accurate since superperms
 			// doesn't support checking cross-world perms. Upgrade to a better
@@ -234,14 +220,14 @@ public class PermissionSystem {
     			permAllowed = p.hasPermission(permission);
     		break;
     	}
-    	case OPS:
-		{
-    		Player p = plugin.getServer().getPlayer(player);
-    		if( p != null )
-    			permAllowed = p.isOp();
-    		break;
-    	}
-    	}
+    	
+    	// if permission isn't allowed yet, we also do legacy op check
+    	if( !permAllowed )
+        {
+            Player p = plugin.getServer().getPlayer(player);
+            if( p != null )
+                permAllowed = p.isOp();
+        }
 
     	return permAllowed;
     }
@@ -270,10 +256,6 @@ public class PermissionSystem {
     		group = getSuperpermsGroup(player);
     		break;
     	}
-            
-        // OPS has no group support
-    	case OPS:
-    		break;
     	}
     	
     	return group;
@@ -302,7 +284,7 @@ public class PermissionSystem {
                     continue;
                 }
                 
-                // we just grab the first "group.XXX" permission we can find
+                // we just grab the first "group.X" permission we can find
                 group = perm.substring(GROUP_PREFIX.length(), perm.length());
                 break;
             }
