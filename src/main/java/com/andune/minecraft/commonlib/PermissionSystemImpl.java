@@ -59,11 +59,12 @@ import com.sk89q.wepif.PermissionsResolverManager;
  * switch statements and if/else ladders.
  * 
  * Now that I'm moving this into its own library, it should be refactored.
+ * Update 5/2/13: still desperately needs refactoring.. added to my TODO list
  * 
  * @author andune
  * 
  */
-public class PermissionSystem {
+public class PermissionSystemImpl {
 	public enum Type {
 		SUPERPERMS,
 		VAULT,
@@ -83,11 +84,11 @@ public class PermissionSystem {
     private PermissionsResolver wepifPerms = null;
 
     @Inject
-	public PermissionSystem(Plugin plugin, Logger log) {
+	public PermissionSystemImpl(Plugin plugin, Logger log) {
 		this.plugin = plugin;
 		this.log = log;
 	}
-    public PermissionSystem(Plugin plugin, java.util.logging.Logger log) {
+    public PermissionSystemImpl(Plugin plugin, java.util.logging.Logger log) {
         this.plugin = plugin;
         this.log = new LoggerJUL(log);
     }
