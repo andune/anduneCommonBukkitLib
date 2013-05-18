@@ -27,25 +27,18 @@
  */
 package com.andune.minecraft.commonlib;
 
-import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import javax.inject.Inject;
-
-import net.milkbowl.vault.permission.Permission;
-
-import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.command.ConsoleCommandSender;
-import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permissible;
-import org.bukkit.permissions.PermissionAttachmentInfo;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.RegisteredServiceProvider;
 
-import com.sk89q.wepif.PermissionsResolver;
-import com.sk89q.wepif.PermissionsResolverManager;
+import com.andune.minecraft.commonlib.perm.PermissionInterface;
 
 /**
  * Permission abstraction class, use Vault, WEPIF or superperms, depending on
@@ -65,108 +58,74 @@ import com.sk89q.wepif.PermissionsResolverManager;
  * 
  */
 public class PermissionSystemImpl {
-	public enum Type {
-		SUPERPERMS,
-		VAULT,
-		WEPIF
-	}
-
-	/** For use by pure superperms systems that have no notion of group, the
-	 * convention is that groups are permissions that start with "group."
-	 */
-    private static final String GROUP_PREFIX = "group.";
-
-	private final Plugin plugin;
-	private final Logger log;
-	private Type systemInUse;
-	
-    private net.milkbowl.vault.permission.Permission vaultPermission = null;
-    private PermissionsResolver wepifPerms = null;
-
-    @Inject
-	public PermissionSystemImpl(Plugin plugin, Logger log) {
-		this.plugin = plugin;
-		this.log = log;
-	}
+    private final Logger log = LoggerFactory.getLogger(PermissionSystemImpl.class);
+    private static final List<String> defaultPermissionSystems = new ArrayList<String>(3);
+    
+    private final Map<String, PermissionInterface> permSystems = new HashMap<String, PermissionInterface>(3);
+    private final Plugin plugin;
+    private PermissionInterface perm;
+    
+    static {
+        defaultPermissionSystems.add("vault");
+        defaultPermissionSystems.add("wepif");
+        defaultPermissionSystems.add("superperms");
+    }
+    
     public PermissionSystemImpl(Plugin plugin, java.util.logging.Logger log) {
         this.plugin = plugin;
         this.log = new LoggerJUL(log);
     }
-
-	public Type getSystemInUse() { return systemInUse; }
-	
-	public String getSystemInUseString() {
-		switch(systemInUse) {
-		case VAULT:
-	        final String permName = Bukkit.getServer().getServicesManager().getRegistration(Permission.class).getProvider().getName();
-			return "VAULT:"+permName;
-		case WEPIF:
-			String wepifPermInUse = "";
-			try {
-				Class<?> clazz = wepifPerms.getClass();
-				Field field = clazz.getDeclaredField("permissionResolver");
-				field.setAccessible(true);
-				Object o = field.get(wepifPerms);
-				String className = o.getClass().getSimpleName();
-				wepifPermInUse = ":"+className.replace("Resolver", "");
-			}
-			// catch both normal and runtime exceptions
-			catch(Throwable t) {
-				// we don't care, it's just extra information if we can get it
-			}
-			
-			return "WEPIF" + wepifPermInUse;
-
-		case SUPERPERMS:
-		default:
-			return "SUPERPERMS";
-		}
-	}
-	
-	public void setupPermissions() {
-		setupPermissions(true);
-	}
-	public void setupPermissions(final boolean verbose) {
-		List<String> permPrefs = null;
-		if( plugin.getConfig().get("permissions") != null ) {
-			permPrefs = plugin.getConfig().getStringList("permissions");
-		}
-		else {
-			permPrefs = new ArrayList<String>(5);
-			permPrefs.add("vault");
-			permPrefs.add("wepif");
-			permPrefs.add("superperms");
-		}
-		
-		for(String system : permPrefs) {
-			if( "vault".equalsIgnoreCase(system) ) {
-				if( setupVaultPermissions() ) {
-					systemInUse = Type.VAULT;
-//					if( verbose )
-//						log.info(logPrefix+"using Vault permissions");
-					break;
-				}
-			}
-			else if( "wepif".equalsIgnoreCase(system) ) {
-				if( setupWEPIFPermissions() ) {
-					systemInUse = Type.WEPIF;
-//					if( verbose )
-//						log.info(logPrefix+"using WEPIF permissions");
-					break;
-				}
-			}
-			else if( "superperms".equalsIgnoreCase(system) ) {
-				systemInUse = Type.SUPERPERMS;
-//				if( verbose )
-//					log.info(logPrefix+"using Superperms permissions");
-	        	break;
-			}
+    
+    public String getSystemInUseString() {
+        return perm.getSystemInUseString();
+    }
+    
+    public void setupPermissions() {
+        setupPermissions(true, null);
+    }
+    public void setupPermissions(final boolean verbose, final List<String> permPrefs) {
+        if( permSystemClasses.size() < 1 )
+            findAllPermSystems();
+        
+        if( permPrefs == null || permPrefs.size() < 1 )
+            permPrefs = defaultPermissionSystems;
+        
+        for(String system : permPrefs) {
+            debug("Perm system \"{}\" returned false on init, not used");
+		        }
+		    }
+		    else {
+		        // this most likely means admin fat-fingered config, let them know
+		        log.error("Could not find matching permSystem \"{}\" to load, skipping", system);
+		    }
 		}
 		
 		if( verbose )
 			log.info("using "+getSystemInUseString()+" for permissions");
 	}
 	
+    /**
+     * Dynamically locate all possible permission systems that we cam use.
+     */
+    private void findAllPermSystems() {
+        Set<Class<? extends PermissionInterface>> permSystemClasses = reflections.getSubTypesOf(PermissionInterface.class);
+        
+        for(Iterator<Class<? extends PermissionInterface>> i = permSystemClasses.iterator(); i.hasNext();) {
+            Class<? extends PermissionInterface> clazz = i.next();
+            // skip any abstract classes
+            if( Modifier.isAbstract(clazz.getModifiers()) )
+                continue;
+            
+            try {
+                PermissionInterface permObject = clazz.newInstance();
+                permSystems.put(permObject.getSystemName(), permObject);
+            }
+            catch(Exception e) {
+                
+            }
+        }
+    }
+
     /** Check to see if player has a given permission.
      * 
      * @param p The player
@@ -174,208 +133,18 @@ public class PermissionSystemImpl {
      * @return true if the player has the permission, false if not
      */
     public boolean has(Permissible sender, String permission) {
-        log.debug("has() sender={}, permission={}", sender, permission);
-
-    	Player p = null;
-    	// console always has access
-    	if( sender instanceof ConsoleCommandSender ) {
-            log.debug("has() ConsoleCommandSender=true");
-    		return true;
-    	}
-    	if( sender instanceof Player )
-    		p = (Player) sender;
-    	
-    	log.debug("has() p={}", p);
-    	
-    	if( p == null ) {
-            log.debug("has() p=null, returning false");
-    		return false;
-    	}
-    	else if( p.isOp() ) {  // legacy op check, op always has access
-            log.debug("has() p.isOp=true, returning true");
-            return true;
-    	}
-    	
-    	boolean permAllowed = false;
-    	switch(systemInUse) {
-    	case VAULT:
-    		permAllowed = vaultPermission.has(p, permission);
-    		break;
-    	case WEPIF:
-    		permAllowed = wepifPerms.hasPermission(p.getName(), permission);
-    		break;
-    	case SUPERPERMS:
-    		permAllowed = p.hasPermission(permission);
-    		break;
-    	}
-    	
-        log.debug("has() permAllowed={}", permAllowed);
-    	return permAllowed;
+        return perm.has(sender,  permission);
     }
-    
+
     public boolean has(String world, String player, String permission) {
-    	boolean permAllowed = false;
-    	switch(systemInUse) {
-    	case VAULT:
-    		permAllowed = vaultPermission.has(world, player, permission);
-    		break;
-    	case WEPIF:
-    		permAllowed = wepifPerms.hasPermission(player, permission);
-    		break;
-    	case SUPERPERMS:
-    		Player p = plugin.getServer().getPlayer(player);
-			// technically this is not guaranteed to be accurate since superperms
-			// doesn't support checking cross-world perms. Upgrade to a better
-			// perm system if you care about this.
-    		if( p != null )
-    			permAllowed = p.hasPermission(permission);
-    		break;
-    	}
-    	
-    	// if permission isn't allowed yet, we also do legacy op check
-    	if( !permAllowed )
-        {
-            Player p = plugin.getServer().getPlayer(player);
-            if( p != null )
-                permAllowed = p.isOp();
-        }
-
-    	return permAllowed;
+        return perm.has(world, player, permission);
     }
+
     public boolean has(String player, String permission) {
-    	return has("world", player, permission);
-    }
-    
-	public String getPlayerGroup(String world, String playerName) {
-    	String group = null;
-    	
-    	switch(systemInUse) {
-    	case VAULT:
-    		group = vaultPermission.getPrimaryGroup(world, playerName);
-    		break;
-    	case WEPIF:
-    	{
-    		String[] groups = wepifPerms.getGroups(playerName);
-    		if( groups != null && groups.length > 0 )
-    			group = groups[0];
-    		break;
-    	}
-    	
-    	case SUPERPERMS:
-    	{
-    		Player player = plugin.getServer().getPlayer(playerName);
-    		group = getSuperpermsGroup(player);
-    		break;
-    	}
-    	}
-    	
-    	return group;
-    }
-	
-	/** Superperms has no group support, but we fake it (this is slow and stupid since
-	  * it has to iterate through ALL permissions a player has).  But if you're
-	  * attached to superperms and not using a nice plugin like bPerms and Vault
-	  * then this is as good as it gets.
-	  * 
-	  * @param player
-	  * @return the group name or null
-	  */
-	private String getSuperpermsGroup(Player player) {
-		if( player == null )
-			return null;
-		
-		String group = null;
-		
-		// this code shamelessly adapted from WorldEdit's WEPIF support for superperms
-        Permissible perms = getPermissible(player);
-        if (perms != null) {
-            for (PermissionAttachmentInfo permAttach : perms.getEffectivePermissions()) {
-                String perm = permAttach.getPermission();
-                if (!(perm.startsWith(GROUP_PREFIX) && permAttach.getValue())) {
-                    continue;
-                }
-                
-                // we just grab the first "group.X" permission we can find
-                group = perm.substring(GROUP_PREFIX.length(), perm.length());
-                break;
-            }
-        }
-        
-        return group;
-	}
-
-	/** This code shamelessly stolen from WEPIF in order to support a fake "group"
-	 * notion for Superperms.
-	 * 
-	 * @param offline
-	 * @return
-	 */
-    private Permissible getPermissible(OfflinePlayer offline) {
-        if (offline == null) return null;
-        Permissible perm = null;
-        if (offline instanceof Permissible) {
-            perm = (Permissible) offline;
-        } else {
-            Player player = offline.getPlayer();
-            if (player != null) perm = player;
-        }
-        return perm;
+        return perm.has(player, permission);
     }
 
-    private boolean setupVaultPermissions()
-    {
-    	Plugin vault = plugin.getServer().getPluginManager().getPlugin("Vault");
-    	if( vault != null ) {
-	        RegisteredServiceProvider<net.milkbowl.vault.permission.Permission> permissionProvider = plugin.getServer().getServicesManager().getRegistration(net.milkbowl.vault.permission.Permission.class);
-	        if (permissionProvider != null) {
-	            vaultPermission = permissionProvider.getProvider();
-	        }
-    	}
-    	
-        return (vaultPermission != null);
-    }
-    
-    private boolean setupWEPIFPermissions() {
-    	try {
-	    	Plugin worldEdit = plugin.getServer().getPluginManager().getPlugin("WorldEdit");
-	    	String version = null;
-	    	int versionNumber = 840;	// assume compliance unless we find otherwise
-	    	
-	    	try {
-		    	version = worldEdit.getDescription().getVersion();
-
-		    	// version "4.7" is equivalent to build #379
-		    	if( "4.7".equals(version) )
-		    		versionNumber = 379;
-		    	// version "5.0" is equivalent to build #670
-		    	else if( "5.0".equals(version) )
-		    		versionNumber = 670;
-		    	else if( version.startsWith("5.") )		// 5.x series
-		    		versionNumber = 840;
-		    	else {
-			    	int index = version.indexOf('-');
-			    	versionNumber = Integer.parseInt(version.substring(0, index));
-		    	}
-	    	}
-	    	catch(Exception e) {}	// catch any NumberFormatException or anything else
-	    	
-//	    	System.out.println("WorldEdit version: "+version+", number="+versionNumber);
-	    	if( versionNumber < 660 ) {
-	    		log.info("You are currently running version "+version+" of WorldEdit. WEPIF was changed in #660, please update to latest WorldEdit. (skipping WEPIF for permissions)");
-	    		return false;
-	    	}
-
-	    	if( worldEdit != null ) {
-	    		wepifPerms = PermissionsResolverManager.getInstance();
-//	    		wepifPerms.initialize(plugin);
-//		    	wepifPerms = new PermissionsResolverManager(this, "LoginLimiter", log);
-//		    	(new PermissionsResolverServerListener(wepifPerms, this)).register(this);
-	    	}
-    	}
-    	catch(Exception e) {
-    		log.info("Unexpected error trying to setup WEPIF permissions hooks (this message can be ignored): "+e.getMessage());
-    	}
-    	
-    	return wepifPerms != null;
+    public String getPlayerGroup(String world, String playerName) {
+        return perm.getPlayerGroup(world, playerName);
     }
 }
