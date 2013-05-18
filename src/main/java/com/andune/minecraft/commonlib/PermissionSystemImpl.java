@@ -120,8 +120,11 @@ public class PermissionSystemImpl {
                 PermissionInterface permObject = clazz.newInstance();
                 permSystems.put(permObject.getSystemName(), permObject);
             }
+            catch(NoClassDefFoundError e) {
+                // we just ignore a system if it's not present
+            }
             catch(Exception e) {
-                log.error("Caught excpetion while initializing permission system", e);
+                log.error("Caught exception while initializing permission system", e);
             }
         }
     }
