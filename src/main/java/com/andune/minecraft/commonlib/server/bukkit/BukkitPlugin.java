@@ -101,7 +101,7 @@ public class BukkitPlugin implements Plugin
                 clazz = clazz.getSuperclass();
             }
 
-            Field classLoaderField = plugin.getClass().getDeclaredField("classLoader");
+            Field classLoaderField = clazz.getDeclaredField("classLoader");
             classLoaderField.setAccessible(true);
             classLoader = (ClassLoader) classLoaderField.get(plugin);
         } catch (Exception e) {
