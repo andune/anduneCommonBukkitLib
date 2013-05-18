@@ -30,10 +30,13 @@
  */
 package com.andune.minecraft.commonlib.server.bukkit;
 
+import java.util.List;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.bukkit.plugin.Plugin;
+import org.reflections.Reflections;
 
 import com.andune.minecraft.commonlib.Initializable;
 import com.andune.minecraft.commonlib.server.api.CommandSender;
@@ -46,12 +49,26 @@ import com.andune.minecraft.commonlib.server.api.PermissionSystem;
 @Singleton
 public class BukkitPermissionSystem implements PermissionSystem, Initializable {
     private final Plugin plugin;
-
+    private final Reflections reflections;
+    private final List<String> preferredPermSystems;
     private com.andune.minecraft.commonlib.PermissionSystemImpl permSystem;
 
     @Inject
-    public BukkitPermissionSystem(Plugin plugin) {
+    public BukkitPermissionSystem(Plugin plugin, Reflections reflections) {
+        this(plugin, reflections, null);
+    }
+
+    /**
+     * Optional non-auto-injected constructor that can be passed a
+     * preferredPermSystem list from a config option.
+     * 
+     * @param plugin
+     * @param preferredPermSystems
+     */
+    public BukkitPermissionSystem(Plugin plugin, Reflections reflections, List<String> preferredPermSystems) {
         this.plugin = plugin;
+        this.reflections = reflections;
+        this.preferredPermSystems = preferredPermSystems;
     }
 
     @Override
@@ -71,8 +88,8 @@ public class BukkitPermissionSystem implements PermissionSystem, Initializable {
 
     @Override
     public void init() throws Exception {
-        permSystem = new com.andune.minecraft.commonlib.PermissionSystemImpl(plugin, plugin.getLogger());
-        permSystem.setupPermissions();
+        permSystem = new com.andune.minecraft.commonlib.PermissionSystemImpl(plugin, reflections);
+        permSystem.setupPermissions(true, preferredPermSystems);
     }
 
     @Override
