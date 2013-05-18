@@ -37,22 +37,14 @@ import java.util.Set;
 
 import org.bukkit.permissions.Permissible;
 import org.bukkit.plugin.Plugin;
+import org.reflections.Reflections;
 
 import com.andune.minecraft.commonlib.perm.PermissionInterface;
 
 /**
- * Permission abstraction class, use Vault, WEPIF or superperms, depending on
- * what's available.
- * 
- * Author's note: The "ideal" design would be to setup an interface class and
- * let each permission type implement that interface and use polymorphism. In
- * fact, that's how Vault and WEPIF work. However, the design goal for this
- * class is to have a single class I can use between projects that implements
- * permissions abstraction, thus the less-than-great C-style integer values,
- * switch statements and if/else ladders.
- * 
- * Now that I'm moving this into its own library, it should be refactored.
- * Update 5/2/13: still desperately needs refactoring.. added to my TODO list
+ * Permission abstraction class, uses underlying permission system such as
+ * Vault, WEPIF or Superperms. Can be passed a preferred list of systems to use
+ * that can be directed from a config file by an admin.
  * 
  * @author andune
  * 
@@ -63,6 +55,7 @@ public class PermissionSystemImpl {
     
     private final Map<String, PermissionInterface> permSystems = new HashMap<String, PermissionInterface>(3);
     private final Plugin plugin;
+    private final Reflections reflections;
     private PermissionInterface perm;
     
     static {
@@ -71,11 +64,11 @@ public class PermissionSystemImpl {
         defaultPermissionSystems.add("superperms");
     }
     
-    public PermissionSystemImpl(Plugin plugin, java.util.logging.Logger log) {
+    public PermissionSystemImpl(Plugin plugin, Reflections reflections) {
         this.plugin = plugin;
-        this.log = new LoggerJUL(log);
+        this.reflections = reflections;
     }
-    
+
     public String getSystemInUseString() {
         return perm.getSystemInUseString();
     }
@@ -83,16 +76,23 @@ public class PermissionSystemImpl {
     public void setupPermissions() {
         setupPermissions(true, null);
     }
-    public void setupPermissions(final boolean verbose, final List<String> permPrefs) {
-        if( permSystemClasses.size() < 1 )
+    public void setupPermissions(final boolean verbose) {
+        setupPermissions(verbose, null);
+    }
+    public void setupPermissions(final boolean verbose, List<String> permPrefs) {
+        if( permSystems.size() < 1 )
             findAllPermSystems();
         
         if( permPrefs == null || permPrefs.size() < 1 )
             permPrefs = defaultPermissionSystems;
         
         for(String system : permPrefs) {
-            debug("Perm system \"{}\" returned false on init, not used");
-		        }
+            PermissionInterface permSystem = permSystems.get(system);
+            if( permSystem != null ) {
+                if( permSystem.init(plugin) )
+                    perm = permSystem;
+                else
+                    log.debug("Perm system \"{}\" returned false on init, not used", system);
 		    }
 		    else {
 		        // this most likely means admin fat-fingered config, let them know
@@ -121,7 +121,7 @@ public class PermissionSystemImpl {
                 permSystems.put(permObject.getSystemName(), permObject);
             }
             catch(Exception e) {
-                
+                log.error("Caught excpetion while initializing permission system", e);
             }
         }
     }
