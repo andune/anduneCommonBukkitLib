@@ -4,6 +4,7 @@
 package com.andune.minecraft.commonlib.perm;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permissible;
@@ -24,7 +25,7 @@ public class Wepif extends BasePermissionChecks implements PermissionInterface {
 
     @Override
     public String getSystemName() {
-        return "wepif";
+        return "WEPIF";
     }
 
     @Override
@@ -62,7 +63,19 @@ public class Wepif extends BasePermissionChecks implements PermissionInterface {
 
             if( worldEdit != null ) {
                 WorldEditPlugin wep = (WorldEditPlugin) worldEdit;
-                wepifPerms = wep.getPermissionsResolver();
+                
+                // we use reflection to get around the fact that WEPIF's
+                // PermissionResolver class can only be found through static
+                // methods (terrible design), which in turn means that any
+                // plugin that uses it will throw NoClassDefFoundError when
+                // loading if WorldEdit isn't present. That doesn't fit our
+                // model since WEPIF is an optional dependency, not a required
+                // one. Reflection allows us to get around this design issue.
+                // (see Vault for a better design)
+                Method m = wep.getClass().getMethod("getPermissionsResolver");
+                wepifPerms = (PermissionsResolver) m.invoke(wep);
+                
+//                wepifPerms = wep.getPermissionsResolver();
 //              wepifPerms.initialize(plugin);
 //              wepifPerms = new PermissionsResolverManager(this, "LoginLimiter", log);
 //              (new PermissionsResolverServerListener(wepifPerms, this)).register(this);
@@ -122,6 +135,6 @@ public class Wepif extends BasePermissionChecks implements PermissionInterface {
             // we don't care, it's just extra information if we can get it
         }
         
-        return "WEPIF" + wepifPermInUse;
+        return getSystemName() + wepifPermInUse;
     }
 }

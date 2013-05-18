@@ -23,7 +23,7 @@ public class Superperms extends BasePermissionChecks implements PermissionInterf
 
     @Override
     public String getSystemName() {
-        return "superperms";
+        return "SUPERPERMS";
     }
 
     /* (non-Javadoc)
@@ -129,6 +129,6 @@ public class Superperms extends BasePermissionChecks implements PermissionInterf
     }
 
     public String getSystemInUseString() {
-        return "SUPERPERMS";
+        return getSystemName();
     }
 }

@@ -23,7 +23,7 @@ public class Vault extends BasePermissionChecks implements PermissionInterface {
 
     @Override
     public String getSystemName() {
-        return "vault";
+        return "VAULT";
     }
 
     /* (non-Javadoc)
@@ -74,6 +74,6 @@ public class Vault extends BasePermissionChecks implements PermissionInterface {
     
     public String getSystemInUseString() {
         final String permName = plugin.getServer().getServicesManager().getRegistration(Permission.class).getProvider().getName();
-        return "VAULT:"+permName;
+        return getSystemName()+":"+permName;
     }
 }

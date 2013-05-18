@@ -86,17 +86,22 @@ public class PermissionSystemImpl {
         if( permPrefs == null || permPrefs.size() < 1 )
             permPrefs = defaultPermissionSystems;
         
+        // loop through the list of preferred permission systems in order and
+        // test to see if each one is present and working. The first one to
+        // initialize successfully is used.
         for(String system : permPrefs) {
-            PermissionInterface permSystem = permSystems.get(system);
+            PermissionInterface permSystem = permSystems.get(system.toUpperCase());
             if( permSystem != null ) {
-                if( permSystem.init(plugin) )
+                if( permSystem.init(plugin) ) {
                     perm = permSystem;
+                    break;
+                }
                 else
                     log.debug("Perm system \"{}\" returned false on init, not used", system);
 		    }
 		    else {
 		        // this most likely means admin fat-fingered config, let them know
-		        log.error("Could not find matching permSystem \"{}\" to load, skipping", system);
+		        log.error("Could not find permSystem \"{}\" to load, skipping", system);
 		    }
 		}
 		
@@ -105,7 +110,7 @@ public class PermissionSystemImpl {
 	}
 	
     /**
-     * Dynamically locate all possible permission systems that we cam use.
+     * Dynamically locate all possible permission systems that we can use.
      */
     private void findAllPermSystems() {
         Set<Class<? extends PermissionInterface>> permSystemClasses = reflections.getSubTypesOf(PermissionInterface.class);
