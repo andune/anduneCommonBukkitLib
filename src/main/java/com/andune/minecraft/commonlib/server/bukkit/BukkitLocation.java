@@ -33,7 +33,9 @@ package com.andune.minecraft.commonlib.server.bukkit;
 import org.bukkit.Bukkit;
 
 import com.andune.minecraft.commonlib.server.api.Block;
+import com.andune.minecraft.commonlib.server.api.Effect;
 import com.andune.minecraft.commonlib.server.api.Location;
+import com.andune.minecraft.commonlib.server.api.Sound;
 import com.andune.minecraft.commonlib.server.api.World;
 import com.andune.minecraft.commonlib.server.api.impl.LocationAbstractImpl;
 
@@ -189,5 +191,26 @@ public class BukkitLocation extends LocationAbstractImpl implements Location {
     @Override
     public World getWorld() {
         return new BukkitWorld(bukkitLocation.getWorld());
+    }
+
+    @Override
+    public void playEffect(Effect effect, int data) {
+        // lightning is handled special, there's no Bukkit visual lightning
+        // effect, we have to trigger lightning through a direct call
+        if( effect == Effect.LIGHTNING ) {
+            getBukkitLocation().getWorld().strikeLightningEffect(getBukkitLocation());
+        }
+        else {
+            org.bukkit.World w = getBukkitLocation().getWorld();
+            org.bukkit.Effect bukkitEffect = BukkitEffect.getBukkitEffect(effect);
+            w.playEffect(getBukkitLocation(), bukkitEffect, 0);
+        }
+    }
+    
+    @Override
+    public void playSound(Sound sound, float volume, float pitch) {
+        org.bukkit.World w = getBukkitLocation().getWorld();
+        org.bukkit.Sound bukkitSound = BukkitSound.getBukkitSound(sound);
+        w.playSound(getBukkitLocation(), bukkitSound, volume, pitch);
     }
 }
