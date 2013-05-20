@@ -141,4 +141,9 @@ public class BukkitPlayer extends BukkitCommandSender implements CommandSender, 
     public boolean isOnline() {
         return bukkitPlayer.isOnline();
     }
+    
+    @Override
+    public String toString() {
+        return "{BukkitPlayer:"+getName()+"}";
+    }
 }
