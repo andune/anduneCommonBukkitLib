@@ -45,6 +45,7 @@ import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.event.world.WorldUnloadEvent;
 import org.bukkit.plugin.Plugin;
 
+import com.andune.minecraft.commonlib.Initializable;
 import com.andune.minecraft.commonlib.Logger;
 import com.andune.minecraft.commonlib.LoggerFactory;
 import com.andune.minecraft.commonlib.i18n.Locale;
@@ -60,7 +61,7 @@ import com.andune.minecraft.commonlib.server.api.World;
  * @author andune
  *
  */
-public class BukkitServer implements Server {
+public class BukkitServer implements Server, Initializable {
     private final Logger log = LoggerFactory.getLogger(BukkitServer.class);
 
     private final Plugin plugin;
@@ -85,8 +86,6 @@ public class BukkitServer implements Server {
         this.teleport = teleport;
         this.locale = locale;
         this.bukkitFactory = bukkitFactory;
-        
-        this.plugin.getServer().getPluginManager().registerEvents(new WorldListener(), this.plugin);
     }
 
     @Override
@@ -260,5 +259,19 @@ public class BukkitServer implements Server {
             players[i] = bukkitFactory.newBukkitPlayer(bukkitOnline[i]); 
         }
         return players;
+    }
+
+    @Override
+    public void init() throws Exception {
+        this.plugin.getServer().getPluginManager().registerEvents(new WorldListener(), this.plugin);
+    }
+
+    @Override
+    public void shutdown() throws Exception {
+    }
+
+    @Override
+    public int getInitPriority() {
+        return 9;
     }
 }
