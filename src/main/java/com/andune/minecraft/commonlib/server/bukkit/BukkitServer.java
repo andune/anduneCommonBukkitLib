@@ -130,6 +130,16 @@ public class BukkitServer implements Server, Initializable {
         else
             return null;
     }
+    
+    @Override
+    public OfflinePlayer getOfflinePlayer(String name) {
+        org.bukkit.OfflinePlayer player = plugin.getServer().getOfflinePlayer(name);
+        if( player != null )
+            return new BukkitOfflinePlayer(player);
+        else
+            return null;
+    }
+
 
     /** Given a string, look for the best possible player match. Returned
      * object could be of subclass Player (if the player is online).

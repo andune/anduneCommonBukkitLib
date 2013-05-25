@@ -52,4 +52,14 @@ public class BukkitOfflinePlayer implements OfflinePlayer {
     public boolean isOnline() {
         return bukkitOfflinePlayer.isOnline();
     }
+    
+    @Override
+    public boolean hasPlayedBefore() {
+        return bukkitOfflinePlayer.hasPlayedBefore();
+    }
+
+    @Override
+    public long getLastPlayed() {
+        return bukkitOfflinePlayer.getLastPlayed();
+    }
 }

@@ -143,6 +143,16 @@ public class BukkitPlayer extends BukkitCommandSender implements CommandSender, 
     }
     
     @Override
+    public boolean hasPlayedBefore() {
+        return bukkitPlayer.hasPlayedBefore();
+    }
+
+    @Override
+    public long getLastPlayed() {
+        return bukkitPlayer.getLastPlayed();
+    }
+
+    @Override
     public String toString() {
         return "{BukkitPlayer:"+getName()+"}";
     }
