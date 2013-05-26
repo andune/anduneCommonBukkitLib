@@ -51,7 +51,10 @@ public class BukkitWorld implements World {
      */
     @Override
     public String getName() {
-        return bukkitWorld.getName();
+        if( bukkitWorld != null )
+            return bukkitWorld.getName();
+        else
+            return null;
     }
 
     @Override
