@@ -153,4 +153,9 @@ public class BukkitYamlConfigFile implements YamlFile {
                 return null;
         }
     }
+    
+    @Override
+    public com.andune.minecraft.commonlib.server.api.ConfigurationSection createConfigurationSection(String path) {
+        return new BukkitConfigurationSection(yaml.createSection(path));
+    }
 }
