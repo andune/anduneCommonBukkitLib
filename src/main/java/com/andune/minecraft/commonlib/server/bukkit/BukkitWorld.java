@@ -30,6 +30,11 @@
  */
 package com.andune.minecraft.commonlib.server.bukkit;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.bukkit.Bukkit;
+
 import com.andune.minecraft.commonlib.server.api.Location;
 import com.andune.minecraft.commonlib.server.api.World;
 
@@ -74,5 +79,40 @@ public class BukkitWorld implements World {
     @Override
     public int getMaxHeight() {
         return bukkitWorld.getMaxHeight();
+    }
+
+    @Override
+    public List<World> getChildWorlds() {
+        final List<World> children = new ArrayList<World>();
+        final String name = getName();
+        if( name != null ) {
+            org.bukkit.World world = Bukkit.getWorld(name+"_nether");
+            if( world != null )
+                children.add(new BukkitWorld(world));
+            world = Bukkit.getWorld(name+"_the_end");
+            if( world != null )
+                children.add(new BukkitWorld(world));
+        }
+        return children;
+    }
+
+    @Override
+    public World getParentWorld() {
+        final String name = getName();
+        String baseName = null;
+        if( name != null ) {
+            if( name.endsWith("_nether") )
+                baseName = name.substring(0, name.length()-7);
+            else if( name.endsWith("_the_end") )
+                baseName = name.substring(0, name.length()-8);
+        }
+        
+        World world = null;
+        if( baseName != null ) {
+            org.bukkit.World w = Bukkit.getWorld(baseName);
+            if( w != null )
+                world = new BukkitWorld(w);
+        }
+        return world;
     }
 }
