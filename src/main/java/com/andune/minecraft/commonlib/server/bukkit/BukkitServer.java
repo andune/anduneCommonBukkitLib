@@ -49,6 +49,7 @@ import com.andune.minecraft.commonlib.Initializable;
 import com.andune.minecraft.commonlib.Logger;
 import com.andune.minecraft.commonlib.LoggerFactory;
 import com.andune.minecraft.commonlib.i18n.Locale;
+import com.andune.minecraft.commonlib.server.api.BukkitFactoryInterface;
 import com.andune.minecraft.commonlib.server.api.CommandSender;
 import com.andune.minecraft.commonlib.server.api.Location;
 import com.andune.minecraft.commonlib.server.api.OfflinePlayer;
@@ -67,7 +68,7 @@ public class BukkitServer implements Server, Initializable {
     private final Plugin plugin;
     private final Teleport teleport;
     private final Locale locale;
-    private final BukkitFactory bukkitFactory;
+    private final BukkitFactoryInterface bukkitFactory;
     
     /* A cached list of worlds, so we don't have to constantly recreate new world
      * wrapper objects.
@@ -80,7 +81,8 @@ public class BukkitServer implements Server, Initializable {
     private boolean clearWorldCache = true;
     
     @Inject
-    public BukkitServer(Plugin plugin, Teleport teleport, Locale locale, BukkitFactory bukkitFactory)
+    public BukkitServer(Plugin plugin, Teleport teleport, Locale locale,
+            BukkitFactoryInterface bukkitFactory)
     {
         this.plugin = plugin;
         this.teleport = teleport;

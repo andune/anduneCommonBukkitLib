@@ -37,8 +37,8 @@ import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import com.andune.minecraft.commonlib.server.api.BukkitFactoryInterface;
 import com.andune.minecraft.commonlib.server.api.CommandSender;
-import com.andune.minecraft.commonlib.server.api.Factory;
 import com.andune.minecraft.commonlib.server.api.Location;
 import com.andune.minecraft.commonlib.server.api.PermissionSystem;
 import com.andune.minecraft.commonlib.server.api.TeleportOptions;
@@ -50,10 +50,10 @@ import com.google.inject.Injector;
  *
  */
 @Singleton
-public class BukkitFactory implements Factory {
+public class BukkitFactory implements BukkitFactoryInterface {
     protected final Injector injector;
     protected final PermissionSystem perm;
-    private final Map<String, WeakReference<CommandSender>> senderCache = new HashMap<String, WeakReference<CommandSender>>();
+    protected final Map<String, WeakReference<CommandSender>> senderCache = new HashMap<String, WeakReference<CommandSender>>();
     
     @Inject
     protected BukkitFactory(Injector injector, PermissionSystem perm) {
@@ -91,12 +91,21 @@ public class BukkitFactory implements Factory {
             if( bukkitSender instanceof org.bukkit.entity.Player )
                 wr = new WeakReference<CommandSender>(newBukkitPlayer((org.bukkit.entity.Player) bukkitSender));
             else
-                wr = new WeakReference<CommandSender>(new BukkitCommandSender(bukkitSender));
+                wr = new WeakReference<CommandSender>(newBukkitCommandSender(bukkitSender));
             sender = wr.get();
             senderCache.put(bukkitSender.getName(), wr);
         }
 
         return sender;
+    }
+    /**
+     * Can be overridden by subclass that wants to provide it's own instance.
+     * 
+     * @param bukkitSender
+     * @return
+     */
+    protected BukkitCommandSender newBukkitCommandSender(org.bukkit.command.CommandSender bukkitSender) {
+        return new BukkitCommandSender(bukkitSender);
     }
     
     public BukkitPlayer newBukkitPlayer(org.bukkit.entity.Player bukkitPlayer) {
