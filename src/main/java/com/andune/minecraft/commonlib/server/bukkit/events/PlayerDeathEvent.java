@@ -1,11 +1,15 @@
-package main.java.com.andune.minecraft.commonlib.server.bukkit.events;
+package com.andune.minecraft.commonlib.server.bukkit.events;
+
+import com.andune.minecraft.commonlib.server.bukkit.BukkitFactory;
 
 /**
- * Created with IntelliJ IDEA.
- * User: morganm
- * Date: 7/24/13
- * Time: 9:52 PM
- * To change this template use File | Settings | File Templates.
+ * @author andune
+ *
  */
-public class PlayerDeathEvent {
+public class PlayerDeathEvent extends PlayerEvent
+        implements com.andune.minecraft.commonlib.server.api.events.PlayerDeathEvent
+{
+    public PlayerDeathEvent(org.bukkit.entity.Player player, BukkitFactory bukkitFactory) {
+        super(player, bukkitFactory);
+    }
 }
