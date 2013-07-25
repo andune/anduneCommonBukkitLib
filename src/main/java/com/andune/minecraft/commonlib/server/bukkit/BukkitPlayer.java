@@ -94,13 +94,11 @@ public class BukkitPlayer extends BukkitCommandSender implements CommandSender, 
 
     @Override
     public void sendMessage(String message) {
-        // TODO: add default color
         bukkitPlayer.sendMessage(message);
     }
 
     @Override
     public void sendMessage(String[] messages) {
-        // TODO: add default color
         bukkitPlayer.sendMessage(messages);
     }
 
