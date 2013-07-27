@@ -93,8 +93,25 @@ public class Teleport {
 		safeIds[Material.POWERED_RAIL.getId()] = 1;
 		safeIds[Material.DETECTOR_RAIL.getId()] = 1;
 		safeIds[Material.RAILS.getId()] = 1;
+        safeIds[Material.ACTIVATOR_RAIL.getId()] = 1;
 		safeIds[Material.SIGN_POST.getId()] = 1;
 		safeIds[Material.WALL_SIGN.getId()] = 1;
+        safeIds[Material.CARPET.getId()] = 1;
+        safeIds[Material.STONE_PLATE.getId()] = 1;
+        safeIds[Material.WOOD_PLATE.getId()] = 1;
+        safeIds[Material.GOLD_PLATE.getId()] = 1;
+        safeIds[Material.IRON_PLATE.getId()] = 1;
+        safeIds[Material.LADDER.getId()] = 1;
+        safeIds[Material.SNOW.getId()] = 1;
+        safeIds[Material.WEB.getId()] = 1;
+        safeIds[Material.VINE.getId()] = 1;
+        safeIds[Material.SAPLING.getId()] = 1;
+        safeIds[Material.STONE_BUTTON.getId()] = 1;
+        safeIds[Material.LEVER.getId()] = 1;
+        safeIds[Material.SUGAR_CANE_BLOCK.getId()] = 1;
+        safeIds[Material.CARROT.getId()] = 1;
+        safeIds[Material.POTATO.getId()] = 1;
+        safeIds[Material.WOOD_BUTTON.getId()] = 1;
 	}
 	
 	@Inject
