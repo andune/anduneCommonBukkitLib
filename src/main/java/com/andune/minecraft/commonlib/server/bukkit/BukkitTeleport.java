@@ -92,9 +92,11 @@ public class BukkitTeleport implements Teleport {
      */
     private com.andune.minecraft.commonlib.Teleport.Bounds getBounds(TeleportOptions options) {
         com.andune.minecraft.commonlib.Teleport.Bounds bounds = new com.andune.minecraft.commonlib.Teleport.Bounds();
-        bounds.minY = options.getMinY();
-        bounds.maxY = options.getMaxY();
-        bounds.maxRange = options.getMaxRange();
+        if( options != null ) {
+            bounds.minY = options.getMinY();
+            bounds.maxY = options.getMaxY();
+            bounds.maxRange = options.getMaxRange();
+        }
         return bounds;
     }
 
@@ -106,14 +108,16 @@ public class BukkitTeleport implements Teleport {
     private int getFlags(TeleportOptions options) {
         int flags = 0;
 
-        if( options.isNoTeleportOverIce() )
-            flags |= com.andune.minecraft.commonlib.Teleport.FLAG_NO_ICE;
-        if( options.isNoTeleportOverLeaves() )
-            flags |= com.andune.minecraft.commonlib.Teleport.FLAG_NO_LEAVES;
-        if( options.isNoTeleportOverLilyPad() )
-            flags |= com.andune.minecraft.commonlib.Teleport.FLAG_NO_LILY_PAD;
-        if( options.isNoTeleportOverWater() )
-            flags |= com.andune.minecraft.commonlib.Teleport.FLAG_NO_WATER;
+        if( options != null ) {
+            if( options.isNoTeleportOverIce() )
+                flags |= com.andune.minecraft.commonlib.Teleport.FLAG_NO_ICE;
+            if( options.isNoTeleportOverLeaves() )
+                flags |= com.andune.minecraft.commonlib.Teleport.FLAG_NO_LEAVES;
+            if( options.isNoTeleportOverLilyPad() )
+                flags |= com.andune.minecraft.commonlib.Teleport.FLAG_NO_LILY_PAD;
+            if( options.isNoTeleportOverWater() )
+                flags |= com.andune.minecraft.commonlib.Teleport.FLAG_NO_WATER;
+        }
         
         return flags;
     }
