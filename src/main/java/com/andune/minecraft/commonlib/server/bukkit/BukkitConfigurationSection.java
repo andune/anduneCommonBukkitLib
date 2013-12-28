@@ -50,6 +50,10 @@ public class BukkitConfigurationSection implements ConfigurationSection {
         this.bukkitConfigSection = bukkitConfigSection;
     }
 
+    protected org.bukkit.configuration.Configuration getBukkitRoot() {
+        return bukkitConfigSection.getRoot();
+    }
+
     @Override
     public Set<String> getKeys() {
         return bukkitConfigSection.getKeys(false);

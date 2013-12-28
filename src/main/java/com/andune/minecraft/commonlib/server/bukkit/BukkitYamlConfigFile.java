@@ -26,7 +26,7 @@
  * GNU General Public License for more details.
  */
 /**
- * 
+ *
  */
 package com.andune.minecraft.commonlib.server.bukkit;
 
@@ -48,54 +48,54 @@ import com.andune.minecraft.commonlib.server.api.YamlFile;
 import com.andune.minecraft.commonlib.server.api.config.ConfigException;
 
 /**
- * @author andune
  *
+ * @author andune
  */
 public class BukkitYamlConfigFile implements YamlFile {
     private static final Logger log = LoggerFactory.getLogger(BukkitYamlConfigFile.class);
 
     private final YamlConfiguration yaml;
     private final Plugin plugin;
-    
+
     @Inject
     public BukkitYamlConfigFile(YamlConfiguration yaml, Plugin plugin) {
         this.yaml = yaml;
         this.plugin = plugin;
     }
-    
+
+    @Override
+    public void addDefaultConfig(com.andune.minecraft.commonlib.server.api.ConfigurationSection defaults) {
+        BukkitConfigurationSection bcs = (BukkitConfigurationSection) defaults;
+        yaml.addDefaults(bcs.getBukkitRoot());
+    }
+
     /**
      * Given a filename, return it's full config file path.
+     *
      * @param file
      * @return
      */
-//    private File configFile(File file) {
-//        File dataDir = plugin.getDataFolder();
-//        File configDir = new File(dataDir, "config");
-//        return new File(configDir, file.getName());
-//    }
-
     @Override
     public void save(File file) throws IOException {
         yaml.save(file);
     }
 
     @Override
-    public void load(File file) throws FileNotFoundException, IOException, ConfigException {
+    public void load(File file) throws IOException, ConfigException {
         log.debug("loading yaml file {}, name = {}", file, file.getName());
         try {
             yaml.load(file);
-        }
-        catch(InvalidConfigurationException e) {
+        } catch (InvalidConfigurationException e) {
             throw new ConfigException(e);
         }
-        
+
         // load defaults if possible, if not, ignore any errors
         String fileName = "config/" + file.getName();
 
         // try file path with prefix, ie. "config/core.yml"
         log.debug("loading defaults for file {}", fileName);
         InputStream defConfigStream = plugin.getResource(fileName);
-        if( defConfigStream != null ) {
+        if (defConfigStream != null) {
             YamlConfiguration defaults = YamlConfiguration.loadConfiguration(defConfigStream);
             yaml.addDefaults(defaults);
             log.debug("defaults loaded for file {}", file);
@@ -107,7 +107,7 @@ public class BukkitYamlConfigFile implements YamlFile {
             // try last two part of file path, ie. "core.yml"
             log.debug("loading defaults for file {}", fileName);
             defConfigStream = plugin.getResource(fileName);
-            if( defConfigStream != null ) {
+            if (defConfigStream != null) {
                 YamlConfiguration defaults = YamlConfiguration.loadConfiguration(defConfigStream);
                 yaml.addDefaults(defaults);
                 log.debug("defaults loaded for file {}", file);
@@ -119,17 +119,16 @@ public class BukkitYamlConfigFile implements YamlFile {
     public com.andune.minecraft.commonlib.server.api.ConfigurationSection getConfigurationSection(String path) {
         ConfigurationSection section = yaml.getConfigurationSection(path);
         log.debug("getConfigurationSection() path={}, section={}", path, section);
-        if( section != null ) {
+        if (section != null) {
             return new BukkitConfigurationSection(section);
         }
         // try defaults
         else {
             ConfigurationSection rootSection = plugin.getConfig().getDefaults();
-//            ConfigurationSection rootSection = yaml.getDefaultSection();
-            if( rootSection != null )
+            if (rootSection != null)
                 section = rootSection.getConfigurationSection(path);
             log.debug("getConfigurationSection() tried defaults, path={}, section={}", path, section);
-            if( section != null )
+            if (section != null)
                 return new BukkitConfigurationSection(section);
             else
                 return null;
@@ -140,20 +139,20 @@ public class BukkitYamlConfigFile implements YamlFile {
     public com.andune.minecraft.commonlib.server.api.ConfigurationSection getRootConfigurationSection() {
         ConfigurationSection section = yaml.getRoot();
         log.debug("getRootConfigurationSection() section={}", section);
-        if( section != null ) {
+        if (section != null) {
             return new BukkitConfigurationSection(section);
         }
         // try defaults
         else {
             section = plugin.getConfig().getDefaults();
             log.debug("getConfigurationSection() tried defaults, section={}", section);
-            if( section != null )
+            if (section != null)
                 return new BukkitConfigurationSection(section);
             else
                 return null;
         }
     }
-    
+
     @Override
     public com.andune.minecraft.commonlib.server.api.ConfigurationSection createConfigurationSection(String path) {
         return new BukkitConfigurationSection(yaml.createSection(path));
