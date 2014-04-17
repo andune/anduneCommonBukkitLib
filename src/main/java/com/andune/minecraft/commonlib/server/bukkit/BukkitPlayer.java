@@ -30,6 +30,7 @@
  */
 package com.andune.minecraft.commonlib.server.bukkit;
 
+import com.andune.minecraft.commonlib.i18n.Colors;
 import com.andune.minecraft.commonlib.server.api.CommandSender;
 import com.andune.minecraft.commonlib.server.api.Location;
 import com.andune.minecraft.commonlib.server.api.PermissionSystem;
@@ -45,15 +46,13 @@ import com.andune.minecraft.commonlib.server.api.World;
 public class BukkitPlayer extends BukkitCommandSender implements CommandSender, Player {
     protected org.bukkit.entity.Player bukkitPlayer;
     protected PermissionSystem perm;
+    protected Colors colors;
     
     /** Protected constructor, should only be invoked from BukkitFactory.
      * 
-     * @param configCore
-     * @param playerDAO
-     * @param bukkitPlayer
      */
-    protected BukkitPlayer(PermissionSystem perm, org.bukkit.entity.Player bukkitPlayer) {
-        super(bukkitPlayer);
+    protected BukkitPlayer(PermissionSystem perm, org.bukkit.entity.Player bukkitPlayer, Colors colors) {
+        super(bukkitPlayer, colors);
         this.perm = perm;
         this.bukkitPlayer = bukkitPlayer;
     }
