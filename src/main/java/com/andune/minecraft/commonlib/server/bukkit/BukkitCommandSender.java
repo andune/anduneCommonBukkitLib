@@ -30,6 +30,7 @@
  */
 package com.andune.minecraft.commonlib.server.bukkit;
 
+import com.andune.minecraft.commonlib.i18n.Colors;
 import com.andune.minecraft.commonlib.server.api.CommandSender;
 
 /**
@@ -37,20 +38,28 @@ import com.andune.minecraft.commonlib.server.api.CommandSender;
  *
  */
 public class BukkitCommandSender implements CommandSender {
-    private org.bukkit.command.CommandSender bukkitSender;
-    
-    public BukkitCommandSender(org.bukkit.command.CommandSender bukkitSender) {
+    private final org.bukkit.command.CommandSender bukkitSender;
+    private final Colors colors;
+
+    public BukkitCommandSender(org.bukkit.command.CommandSender bukkitSender, Colors colors) {
         this.bukkitSender = bukkitSender;
+        this.colors = colors;
     }
 
     @Override
     public void sendMessage(String message) {
-        bukkitSender.sendMessage(message);
+        bukkitSender.sendMessage(colors.applyColors(message));
     }
 
     @Override
     public void sendMessage(String[] messages) {
-        bukkitSender.sendMessage(messages);
+        if( messages != null && messages.length > 0 ) {
+            String[] coloredMessages = new String[messages.length];
+            for(int i=0; i < messages.length; i++) {
+                coloredMessages[i] = colors.applyColors(messages[i]);
+            }
+            bukkitSender.sendMessage(coloredMessages);
+        }
     }
 
     @Override

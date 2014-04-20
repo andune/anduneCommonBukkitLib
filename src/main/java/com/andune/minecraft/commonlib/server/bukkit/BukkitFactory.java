@@ -37,6 +37,7 @@ import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import com.andune.minecraft.commonlib.i18n.Colors;
 import com.andune.minecraft.commonlib.server.api.BukkitFactoryInterface;
 import com.andune.minecraft.commonlib.server.api.CommandSender;
 import com.andune.minecraft.commonlib.server.api.Location;
@@ -54,11 +55,13 @@ public class BukkitFactory implements BukkitFactoryInterface {
     protected final Injector injector;
     protected final PermissionSystem perm;
     protected final Map<String, WeakReference<CommandSender>> senderCache = new HashMap<String, WeakReference<CommandSender>>();
+    protected final Colors colors;
     
     @Inject
-    protected BukkitFactory(Injector injector, PermissionSystem perm) {
+    protected BukkitFactory(Injector injector, PermissionSystem perm, Colors colors) {
         this.injector = injector;
         this.perm = perm;
+        this.colors = colors;
     }
 
     @Override
@@ -105,10 +108,10 @@ public class BukkitFactory implements BukkitFactoryInterface {
      * @return
      */
     protected BukkitCommandSender newBukkitCommandSender(org.bukkit.command.CommandSender bukkitSender) {
-        return new BukkitCommandSender(bukkitSender);
+        return new BukkitCommandSender(bukkitSender, colors);
     }
     
     public BukkitPlayer newBukkitPlayer(org.bukkit.entity.Player bukkitPlayer) {
-        return new BukkitPlayer(perm, bukkitPlayer);
+        return new BukkitPlayer(perm, bukkitPlayer, colors);
     }
 }
