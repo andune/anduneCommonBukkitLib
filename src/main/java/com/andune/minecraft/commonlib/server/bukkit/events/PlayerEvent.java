@@ -43,7 +43,7 @@ import com.google.inject.Inject;
 public abstract class PlayerEvent {
     protected final org.bukkit.event.player.PlayerEvent bukkitPlayerEvent;
     protected final BukkitFactory bukkitFactory;
-    protected Player player;
+    private Player player;
     
     @Inject
     public PlayerEvent(org.bukkit.event.player.PlayerEvent bukkitPlayerEvent, BukkitFactory bukkitFactory) {

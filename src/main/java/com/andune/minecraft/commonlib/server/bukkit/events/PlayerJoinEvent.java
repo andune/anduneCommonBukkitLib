@@ -56,21 +56,14 @@ implements com.andune.minecraft.commonlib.server.api.events.PlayerJoinEvent
     @SuppressWarnings("unused")
     private org.bukkit.event.player.PlayerJoinEvent event;
 
-    public PlayerJoinEvent(org.bukkit.event.player.PlayerJoinEvent event, BukkitFactory bukkitFactory) {
+    public PlayerJoinEvent(org.bukkit.event.player.PlayerJoinEvent event, BukkitFactory bukkitFactory,
+                           Plugin plugin, Server server) {
         super(event, bukkitFactory);
         this.event = event;
-    }
-    
-    @Inject
-    public void setPlugin(Plugin plugin) {
         this.plugin = plugin;
-    }
-
-    @Inject
-    public void setServer(Server server) {
         this.server = server;
     }
-
+    
     /**
      * This method doesn't exist on the actual bukkit event, so to simulate it we
      * setup a delayed teleport. This is not an ideal implementation since multiple
@@ -97,14 +90,15 @@ implements com.andune.minecraft.commonlib.server.api.events.PlayerJoinEvent
         plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
             public void run() {
                 Location currentLocation = getPlayer().getLocation();
+                checkNotNull(currentLocation);
                 
                 // do manual world/x/y/z check instead of .equals() so that we avoid comparing
                 // pitch/yaw and also so we round to integer blocks instead of exact double loc
-                if( currentLocation.getWorld() != hspLocation.getWorld()
+                if( !currentLocation.getWorld().getName().equals(hspLocation.getWorld().getName())
                         || currentLocation.getBlockX() != hspLocation.getBlockX()
                         || currentLocation.getBlockY() != hspLocation.getBlockY()
                         || currentLocation.getBlockZ() != hspLocation.getBlockZ() ) {
-                    log.info("onJoin: final player location is different than where HSP sent player, another plugin has changed the location."
+                    log.info("onJoin: final player location is different than where "+plugin.getName()+" sent player, another plugin has changed the location."
                             +" Player {}, HSP location {}"
                             +", final player location {}",
                             getPlayer().getName(), hspLocation.shortLocationString(),
