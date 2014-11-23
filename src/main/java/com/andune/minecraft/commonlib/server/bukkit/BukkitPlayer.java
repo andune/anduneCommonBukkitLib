@@ -77,6 +77,9 @@ public class BukkitPlayer extends BukkitCommandSender implements CommandSender, 
     }
 
     @Override
+    public java.util.UUID getUUID() { return bukkitPlayer.getUniqueId(); }
+
+    @Override
     public Location getLocation() {
         return new BukkitLocation(bukkitPlayer.getLocation());
     }
