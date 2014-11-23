@@ -39,6 +39,7 @@ import com.andune.minecraft.commonlib.LoggerFactory;
 import com.andune.minecraft.commonlib.server.api.Location;
 import com.andune.minecraft.commonlib.server.api.Server;
 import com.andune.minecraft.commonlib.server.bukkit.BukkitFactory;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 
 /** Bukkit implementation of PlayerJoinEvent API.
@@ -81,12 +82,15 @@ implements com.andune.minecraft.commonlib.server.api.events.PlayerJoinEvent
      */
     @Override
     public void setJoinLocation(Location joinLocation) {
+        checkNotNull(joinLocation);
+        checkNotNull(server);
+
         /*
          * Bukkit does not support this event and teleporting the player directly
          * during a join event can crash the server. So we have to setup a delayed
          * event and teleport them after a small delay.
          */
-        server.delayedTeleport(player, joinLocation);
+        server.delayedTeleport(getPlayer(), joinLocation);
         
         // verify they ended up where we sent them by checking 5 tics later
         final Location hspLocation = joinLocation;
