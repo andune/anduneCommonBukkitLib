@@ -123,6 +123,7 @@
             <exclude>**/src/main/resources/**</exclude>
             <exclude>**/src/main/assembly/**</exclude>
             <exclude>**/src/main/license/**</exclude>
+            <exclude>**/.idea/**</exclude>
             <exclude>**/build.number</exclude>
             <exclude>**/*.md</exclude>
             <exclude>*.txt</exclude>
