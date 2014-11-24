@@ -42,6 +42,7 @@ import com.andune.minecraft.commonlib.server.api.Player;
 import com.andune.minecraft.commonlib.server.api.Teleport;
 import com.andune.minecraft.commonlib.server.api.TeleportOptions;
 import com.google.inject.Inject;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * @author andune
@@ -134,16 +135,26 @@ public class BukkitTeleport implements Teleport {
     public Location findRandomSafeLocation(Location min, Location max, TeleportOptions options) {
         if( min == null || max == null )
             return null;
-        
-        if( !min.getWorld().equals(max.getWorld()) ) {
+
+        checkNotNull(min.getWorld());
+        checkNotNull(max.getWorld());
+
+        if( !min.getWorld().getName().equals(max.getWorld().getName()) ) {
             log.warn("Attempted to find random location between two different worlds: {}, {}", min.getWorld(), max.getWorld());
             return null;
         }
         
         log.debug("findRandomSafeLocation(): min: {}, max: {}", min, max);
-        
+
+        int minY = min.getBlockY();
+        if( minY < options.getMinY() )
+            minY = options.getMinY();
+        int maxY = max.getBlockY();
+        if( maxY > options.getMaxY() )
+            maxY = options.getMaxY();
+
         int x = randomDeltaInt(min.getBlockX(), max.getBlockX());
-        int y = randomDeltaInt(options.getMinY(), options.getMaxY());
+        int y = randomDeltaInt(minY, maxY);
         int z = randomDeltaInt(min.getBlockZ(), max.getBlockZ());
         
         Location newLoc = factory.newLocation(min.getWorld().getName(), x, y, z, 0, 0);
@@ -195,7 +206,7 @@ public class BukkitTeleport implements Teleport {
         int delta = getDistanceDelta(i, j);
         log.debug("randomDeltaInt(): i={}, j={}, delta={}", i, j, delta);
         if( delta == 0 )
-            return 0;
+            return i;
         
         int r = random.nextInt(delta);
         if( i < j )
