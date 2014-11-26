@@ -34,6 +34,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -57,16 +59,53 @@ public class BukkitYamlConfigFile implements YamlFile {
     private final YamlConfiguration yaml;
     private final Plugin plugin;
 
+    /**
+     * Author's note: since I spent 30 minutes hunting this down, forgetting
+     * how it worked..  This class is designed to be instantiated through the
+     * BukkitFactory, which simply creates a new instance. The constructor
+     * arguments are injected automatically by an IoC container. In the case
+     * of the first argument, it simply instantiates a new (totally empty)
+     * YamlConfiguration object, with no ties to any specific yaml configuration
+     * file at all.
+     *
+     * @param yaml
+     * @param plugin
+     */
     @Inject
     public BukkitYamlConfigFile(YamlConfiguration yaml, Plugin plugin) {
         this.yaml = yaml;
         this.plugin = plugin;
     }
 
+    /**
+     * Implementation note: It turns out Bukkit does not cascade defaults, nor
+     * does it maintain defaults when you grab a ConfigSection, so as a result,
+     * Bukkit's default "addDefaults" method fails for the common use case I'm
+     * trying to achieve, which is multiple cascading default sections.
+     *
+     * As a result, we actually iterate through all the keys in the default
+     * section and check if they exist in the YAML and if not, we add them
+     * directly.
+     *
+     * @param defaults
+     */
     @Override
-    public void addDefaultConfig(com.andune.minecraft.commonlib.server.api.ConfigurationSection defaults) {
-        BukkitConfigurationSection bcs = (BukkitConfigurationSection) defaults;
-        yaml.addDefaults(bcs.getBukkitRoot());
+    public Set<String> addDefaultConfig(com.andune.minecraft.commonlib.server.api.ConfigurationSection defaults) {
+        Set<String> defaultsAdded = new HashSet<String>();
+
+        log.debug("in Bukkit addDefaultConfig");
+        Set<String> keys = defaults.getKeys(true);
+        for(String key : keys) {
+            log.debug("checking key {}", key);
+            if( !yaml.isSet(key) ) {
+                log.debug("Assigning default to key {}", key);
+                yaml.set(key, defaults.get(key));
+                defaultsAdded.add(key);
+            }
+        }
+        log.debug("leaving Bukkit addDefaultConfig");
+
+        return defaultsAdded;
     }
 
     /**
@@ -112,6 +151,15 @@ public class BukkitYamlConfigFile implements YamlFile {
                 yaml.addDefaults(defaults);
                 log.debug("defaults loaded for file {}", file);
             }
+        }
+    }
+
+    public void loadFromString(final String input) throws ConfigException {
+        log.debug("loading yaml from string");
+        try {
+            yaml.loadFromString(input);
+        } catch (InvalidConfigurationException e) {
+            throw new ConfigException(e);
         }
     }
 
