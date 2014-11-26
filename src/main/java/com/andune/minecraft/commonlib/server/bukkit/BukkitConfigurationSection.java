@@ -60,6 +60,11 @@ public class BukkitConfigurationSection implements ConfigurationSection {
     }
 
     @Override
+    public Set<String> getKeys(boolean deep) {
+        return bukkitConfigSection.getKeys(deep);
+    }
+
+    @Override
     public Set<String> getKeys(String path) {
         org.bukkit.configuration.ConfigurationSection section = bukkitConfigSection.getConfigurationSection(path);
         if( section != null ) {
