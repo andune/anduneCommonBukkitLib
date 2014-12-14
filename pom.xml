@@ -5,7 +5,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.andune.minecraft.commonlib</groupId>
   <artifactId>commonBukkitlib</artifactId>
-  <version>0.8</version>
+  <version>0.8.1-SNAPSHOT</version>
   <name>commonBukkitlib</name>
   <description>commonBukkitlib is a library of Bukkit-specific classes for use Andune's MineCraft plugins</description>
 
@@ -55,7 +55,7 @@
     <dependency>
       <groupId>com.andune.minecraft.commonlib</groupId>
       <artifactId>commonlib</artifactId>
-      <version>0.8</version>
+      <version>0.8.1-SNAPSHOT</version>
     </dependency>
 
     <dependency>
