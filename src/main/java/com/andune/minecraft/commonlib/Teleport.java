@@ -286,6 +286,18 @@ public class Teleport {
 			// the mixY/minY checks prevent this from being infinitely recursive,
 			// since this can only be true once.
 	    	Location highest = w.getHighestBlockAt(baseLocation).getLocation();
+
+			// check for the situation where there are no blocks at all - as in
+			// an intentionally empty world. This is manifest by the highest
+			// block being reported as less than Y=1. In this situation, there
+			// is no safe place to be found, so exit here to avoid an infinite
+			// loop.
+			if (highest.getBlockY() < 1) {
+				log.debug("findSafeLocation2(): hit maximum recursion distance {}, highest Y-block is {}. Aborting safe algorithm",
+						bounds.maxRange, highest.getY());
+				return null;
+			}
+
 	    	if( highest.getY() > maxY || highest.getY() < minY ) {
 				log.debug("findSafeLocation2(): hit maximum recursion distance {}, moving to highest Y-block at {} and trying again",
 				        bounds.maxRange, highest.getY());
@@ -319,7 +331,8 @@ public class Teleport {
 	 * player, spawn them over lava, etc.
 	 * 
 	 * @param l the location to start searching from
-	 * @param minY the minimum Y distance to check
+	 * @param bounds Bounds specifying limits on the safeTeleport algorithm
+	 * @param flags flags that control the safeTeleport algorithm, see TeleportOptions
 	 * @return the safe location or null if none could be found
 	 */
 	public Location safeLocation(Location l, Bounds bounds, int flags) {
@@ -333,18 +346,11 @@ public class Teleport {
 				// preserve pitch/yaw
 				target.setPitch(l.getPitch());
 				target.setYaw(l.getYaw());
-	
+
 				// adjust by 0.5 so we teleport to the middle of the block, not
 				// the edge
-//				if( target.getX() > 0 )
-					target.setX(target.getX()+0.5);
-//				else
-//					target.setX(target.getX()-0.5);
-				
-//				if( target.getZ() > 0 )
-					target.setZ(target.getZ()+0.5);
-//				else
-//					target.setZ(target.getZ()-0.5);
+				target.setX(target.getX() + 0.5);
+				target.setZ(target.getZ() + 0.5);
 				log.debug("adjusted coordinates to middle. x={}, z={}", target.getX(), target.getZ());
 			}
 			else
