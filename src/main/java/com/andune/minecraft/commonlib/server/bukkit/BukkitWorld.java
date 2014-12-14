@@ -115,4 +115,26 @@ public class BukkitWorld implements World {
         }
         return world;
     }
+
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof BukkitWorld)) {
+            return false;
+        }
+        if (bukkitWorld == null) {
+            return false;
+        }
+
+        BukkitWorld other = (BukkitWorld) o;
+        return bukkitWorld.equals(other.bukkitWorld);
+    }
+
+    public int hashCode() {
+        if (bukkitWorld != null)
+            return bukkitWorld.hashCode();
+        else
+            return super.hashCode();
+    }
 }
