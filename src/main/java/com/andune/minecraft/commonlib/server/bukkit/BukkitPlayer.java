@@ -91,7 +91,10 @@ public class BukkitPlayer extends BukkitCommandSender implements CommandSender, 
 
     @Override
     public Location getBedSpawnLocation() {
-        return new BukkitLocation(bukkitPlayer.getBedSpawnLocation());
+        if( bukkitPlayer.getBedSpawnLocation() != null )
+            return new BukkitLocation(bukkitPlayer.getBedSpawnLocation());
+        else
+            return null;
     }
 
     @Override
