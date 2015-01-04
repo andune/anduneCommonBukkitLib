@@ -79,7 +79,7 @@ public class Vault extends BasePermissionChecks implements PermissionInterface {
         boolean permAllowed = super.has(sender, permission);
         if( !permAllowed && sender instanceof Player )
             permAllowed = vaultPermission.has((Player) sender, permission);
-        log.debug("has() permAllowed={}", permAllowed);
+        log.debug("Vault.has() sender={}, permission={}, permAllowed={}", sender, permission, permAllowed);
         return permAllowed;
     }
 
