@@ -114,4 +114,13 @@ public class BukkitFactory implements BukkitFactoryInterface {
     public BukkitPlayer newBukkitPlayer(org.bukkit.entity.Player bukkitPlayer) {
         return new BukkitPlayer(perm, bukkitPlayer, colors);
     }
+
+    /**
+     * Should be called whenever a player object is known to be invalidated.
+     * Rather than clearing individual keys, we just evacuate the entire cache,
+     * it is extremely fast to re-populate it.
+     */
+    public void clearPlayerCache() {
+        senderCache.clear();
+    }
 }
