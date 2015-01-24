@@ -46,6 +46,10 @@ import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
  *
  */
 public class Teleport {
+	// maximum number of loops findSafeLocation is allowed to do under
+	// any circumstance. Infinite recursion protection.
+	private static final int MAX_LOOPS = 50;
+
 	public static final int FLAG_NO_WATER = 0x01; 
 	public static final int FLAG_NO_LILY_PAD = 0x02; 
 	public static final int FLAG_NO_LEAVES = 0x04; 
@@ -195,8 +199,14 @@ public class Teleport {
      * @return
      */
 	private Location findSafeLocation2(final Location baseLocation, final int level,
-			final Bounds bounds, final int flags)
+			final Bounds bounds, final int flags, int loops)
 	{
+		if( loops > MAX_LOOPS ) {
+			log.warn("findSafeLocation fail-safe triggered. Aborting to prevent infinite recursion. Location={}, bounds={}, flags={}",
+					baseLocation, bounds, flags);
+			return baseLocation;
+		}
+
 		log.debug("findSafeLocation2(): level={}, baseLocation={}, flags={}",
 		        level, baseLocation, flags);
 		final World w = baseLocation.getWorld();
@@ -301,13 +311,13 @@ public class Teleport {
 	    	if( highest.getY() > maxY || highest.getY() < minY ) {
 				log.debug("findSafeLocation2(): hit maximum recursion distance {}, moving to highest Y-block at {} and trying again",
 				        bounds.maxRange, highest.getY());
-				return findSafeLocation2(highest, 0, bounds, flags);
+				return findSafeLocation2(highest, 0, bounds, flags, loops+1);
 	    	}
 			log.debug("findSafeLocation2(): hit maximum recursion distance {}, returning null", bounds.maxRange);
 			return null;
 		}
 		
-		return findSafeLocation2(baseLocation, level+1, bounds, flags);
+		return findSafeLocation2(baseLocation, level+1, bounds, flags, loops+1);
 	}
 	
 	/** Safely teleport a player to a location. Should avoid them being stuck in blocks,
@@ -339,7 +349,7 @@ public class Teleport {
 		if( bounds == null )
 			bounds = defaultBounds;
 		
-		Location target = findSafeLocation2(l, 0, bounds, flags);
+		Location target = findSafeLocation2(l, 0, bounds, flags, 0);
 		
 		if( target != null ) {
 			if( !target.equals(l) ) {
