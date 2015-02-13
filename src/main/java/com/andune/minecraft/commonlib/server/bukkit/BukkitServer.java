@@ -224,6 +224,8 @@ public class BukkitServer implements Server, Initializable {
         }
         
         worldList = Collections.unmodifiableList(new ArrayList<World>(worlds.values()));
+
+        clearWorldCache = false;
     }
 
     @Override
