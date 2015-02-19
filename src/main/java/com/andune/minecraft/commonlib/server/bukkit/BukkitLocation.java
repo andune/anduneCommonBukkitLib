@@ -213,4 +213,17 @@ public class BukkitLocation extends LocationAbstractImpl implements Location {
         org.bukkit.Sound bukkitSound = BukkitSound.getBukkitSound(sound);
         w.playSound(getBukkitLocation(), bukkitSound, volume, pitch);
     }
+
+    public boolean equals(Object o) {
+        if (o == null) return false;
+        if (this == o) return true;
+        if (o instanceof BukkitLocation)
+            return bukkitLocation.equals(((BukkitLocation) o).bukkitLocation);
+        else
+            return false;
+    }
+
+    public int hashCode() {
+        return bukkitLocation.hashCode();
+    }
 }
