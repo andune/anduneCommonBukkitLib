@@ -38,12 +38,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import com.andune.minecraft.commonlib.i18n.Colors;
-import com.andune.minecraft.commonlib.server.api.BukkitFactoryInterface;
-import com.andune.minecraft.commonlib.server.api.CommandSender;
-import com.andune.minecraft.commonlib.server.api.Location;
-import com.andune.minecraft.commonlib.server.api.PermissionSystem;
-import com.andune.minecraft.commonlib.server.api.TeleportOptions;
-import com.andune.minecraft.commonlib.server.api.YamlFile;
+import com.andune.minecraft.commonlib.server.api.*;
 import com.google.inject.Injector;
 
 /**
@@ -122,5 +117,19 @@ public class BukkitFactory implements BukkitFactoryInterface {
      */
     public void clearPlayerCache() {
         senderCache.clear();
+    }
+
+
+    /**
+     * Create and return a new vector object.
+     *
+     * @param x x velocity
+     * @param y y velocity
+     * @param z z velocity
+     *
+     * @return the new Vector object
+     */
+    public Vector newVector(int x, int y, int z) {
+        return new BukkitVector(x, y, z);
     }
 }

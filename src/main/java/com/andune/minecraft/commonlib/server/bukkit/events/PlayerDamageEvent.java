@@ -31,6 +31,7 @@
 package com.andune.minecraft.commonlib.server.bukkit.events;
 
 import com.andune.minecraft.commonlib.server.bukkit.BukkitFactory;
+import com.google.inject.Inject;
 
 /**
  * @author andune
@@ -39,7 +40,25 @@ import com.andune.minecraft.commonlib.server.bukkit.BukkitFactory;
 public class PlayerDamageEvent extends PlayerEvent 
 implements com.andune.minecraft.commonlib.server.api.events.PlayerDamageEvent
 {
-    public PlayerDamageEvent(org.bukkit.entity.Player player, BukkitFactory bukkitFactory) {
+    private final org.bukkit.event.entity.EntityDamageEvent bukkitDamageEvent;
+
+    @Inject
+    public PlayerDamageEvent(org.bukkit.event.entity.EntityDamageEvent bukkitDamageEvent, org.bukkit.entity.Player player, BukkitFactory bukkitFactory) {
         super(player, bukkitFactory);
+        this.bukkitDamageEvent = bukkitDamageEvent;
+    }
+
+    @Override
+    public void setCancelled(boolean canceled) {
+        bukkitDamageEvent.setCancelled(canceled);
+    }
+
+    public String toString() {
+        return "[PlayerDamageEvent"
+                +",cause="+bukkitDamageEvent.getCause()
+                +",damage="+bukkitDamageEvent.getDamage()
+                +",player="+super.getPlayer()
+                +",location="+super.getPlayer().getLocation().shortLocationString()
+                +"]";
     }
 }

@@ -30,39 +30,41 @@
  */
 package com.andune.minecraft.commonlib.server.bukkit.events;
 
-
-import com.andune.minecraft.commonlib.server.api.Player;
 import com.andune.minecraft.commonlib.server.bukkit.BukkitFactory;
 import com.google.inject.Inject;
 
-/** Base class that represents an event about a player.
- * 
+/**
  * @author andune
  *
  */
-public abstract class PlayerEvent implements com.andune.minecraft.commonlib.server.api.events.PlayerEvent {
-    protected final org.bukkit.event.player.PlayerEvent bukkitPlayerEvent;
-    protected final BukkitFactory bukkitFactory;
-    private Player player;
-    
-    @Inject
-    public PlayerEvent(org.bukkit.event.player.PlayerEvent bukkitPlayerEvent, BukkitFactory bukkitFactory) {
-        this.bukkitPlayerEvent = bukkitPlayerEvent;
-        this.bukkitFactory = bukkitFactory;
-    }
+public class PlayerFallThroughWorldEvent extends PlayerEvent
+implements com.andune.minecraft.commonlib.server.api.events.PlayerFallThroughWorldEvent
+{
+    private final org.bukkit.event.entity.EntityDamageEvent bukkitDamageEvent;
 
     @Inject
-    public PlayerEvent(org.bukkit.entity.Player player, BukkitFactory bukkitFactory) {
-        this.bukkitFactory = bukkitFactory;
-        this.player = bukkitFactory.newBukkitPlayer(player);
-        this.bukkitPlayerEvent = null;
+    public PlayerFallThroughWorldEvent(org.bukkit.event.entity.EntityDamageEvent bukkitDamageEvent, org.bukkit.entity.Player player, BukkitFactory bukkitFactory) {
+        super(player, bukkitFactory);
+        this.bukkitDamageEvent = bukkitDamageEvent;
     }
 
     @Override
-    public Player getPlayer() {
-        if( player == null )
-            player = bukkitFactory.newBukkitPlayer(bukkitPlayerEvent.getPlayer());
-        
-        return player;
+    public void setCancelled(boolean canceled) {
+        bukkitDamageEvent.setCancelled(canceled);
+    }
+
+    @Override
+    public boolean isCancelled() {
+        return bukkitDamageEvent.isCancelled();
+    }
+
+    public String toString() {
+        return "[PlayerFallThroughWorldEvent"
+                +",cause="+bukkitDamageEvent.getCause()
+                +",damage="+bukkitDamageEvent.getDamage()
+                +",isCancelled="+isCancelled()
+                +",player="+super.getPlayer()
+                +",location="+super.getPlayer().getLocation().shortLocationString()
+                +"]";
     }
 }

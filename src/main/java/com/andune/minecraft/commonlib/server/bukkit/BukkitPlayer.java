@@ -31,11 +31,7 @@
 package com.andune.minecraft.commonlib.server.bukkit;
 
 import com.andune.minecraft.commonlib.i18n.Colors;
-import com.andune.minecraft.commonlib.server.api.CommandSender;
-import com.andune.minecraft.commonlib.server.api.Location;
-import com.andune.minecraft.commonlib.server.api.PermissionSystem;
-import com.andune.minecraft.commonlib.server.api.Player;
-import com.andune.minecraft.commonlib.server.api.World;
+import com.andune.minecraft.commonlib.server.api.*;
 
 /**
  * Bukkit implementation of Player API.
@@ -124,6 +120,11 @@ public class BukkitPlayer extends BukkitCommandSender implements CommandSender, 
         // if BukkitPlayer is in use, it's because we're running on a Bukkit Server so
         // we can safely assume the incoming object is a BukkitLocation
         bukkitPlayer.teleport( ((BukkitLocation) location).getBukkitLocation() );
+    }
+
+    @Override
+    public void setVelocity(Vector velocity) {
+        bukkitPlayer.setVelocity(((BukkitVector) velocity).getBukkitVector());
     }
     
     public boolean equals(Object o) {
