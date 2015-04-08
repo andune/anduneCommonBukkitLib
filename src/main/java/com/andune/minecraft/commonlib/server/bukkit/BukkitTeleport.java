@@ -65,14 +65,20 @@ public class BukkitTeleport implements Teleport {
     @Override
     public Location safeLocation(Location location) {
         org.bukkit.Location safeLoc = teleportUtil.safeLocation(((BukkitLocation) location).getBukkitLocation());
-        return new BukkitLocation(safeLoc);
+        if (safeLoc != null)
+            return new BukkitLocation(safeLoc);
+        else
+            return null;
     }
 
     @Override
     public Location safeLocation(Location location, TeleportOptions options) {
         org.bukkit.Location safeLoc = teleportUtil.safeLocation(((BukkitLocation) location).getBukkitLocation(),
                 getBounds(options), getFlags(options));
-        return new BukkitLocation(safeLoc);
+        if (safeLoc != null)
+            return new BukkitLocation(safeLoc);
+        else
+            return null;
     }
 
     @Override
