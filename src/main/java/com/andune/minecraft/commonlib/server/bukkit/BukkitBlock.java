@@ -30,14 +30,10 @@
  */
 package com.andune.minecraft.commonlib.server.bukkit;
 
-import javax.inject.Inject;
-
+import com.andune.minecraft.commonlib.server.api.*;
 import org.bukkit.Bukkit;
 
-import com.andune.minecraft.commonlib.server.api.Block;
-import com.andune.minecraft.commonlib.server.api.BlockFace;
-import com.andune.minecraft.commonlib.server.api.Location;
-import com.andune.minecraft.commonlib.server.api.World;
+import javax.inject.Inject;
 
 /**
  * @author andune
@@ -75,8 +71,8 @@ public class BukkitBlock implements Block {
      * @see com.andune.minecraft.hsp.server.api.Block#getTypeId()
      */
     @Override
-    public int getTypeId() {
-        return bukkitBlock.getTypeId();
+    public BlockType getType() {
+        return BukkitBlockType.getBlockType(bukkitBlock.getType());
     }
 
     /* (non-Javadoc)
