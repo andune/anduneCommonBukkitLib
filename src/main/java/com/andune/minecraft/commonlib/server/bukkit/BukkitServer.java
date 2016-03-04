@@ -267,11 +267,13 @@ public class BukkitServer implements Server, Initializable {
 
     @Override
     public Player[] getOnlinePlayers() {
-        org.bukkit.entity.Player[] bukkitOnline = plugin.getServer().getOnlinePlayers();
-        Player[] players = new Player[bukkitOnline.length];
-        for(int i=0; i < bukkitOnline.length; i++) {
-            players[i] = bukkitFactory.newBukkitPlayer(bukkitOnline[i]); 
-        }
+		Player[] players = new Player[plugin.getServer().getOnlinePlayers().size()];
+		int i = 0;
+		for (org.bukkit.entity.Player aOnline : plugin.getServer().getOnlinePlayers())
+		{
+			players[i] = bukkitFactory.newBukkitPlayer(aOnline);
+			i++;
+		}
         return players;
     }
 
