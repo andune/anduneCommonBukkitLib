@@ -42,13 +42,13 @@ import com.andune.minecraft.commonlib.server.api.Sound;
  *
  */
 public enum BukkitSound {
-    THUNDER(Sound.THUNDER, org.bukkit.Sound.AMBIENCE_THUNDER),
-    ENDERMAN_TELEPORT(Sound.ENDERMAN_TELEPORT, org.bukkit.Sound.ENDERMAN_TELEPORT),
-    FIRE(Sound.FIRE, org.bukkit.Sound.FIRE),
-    EXPLODE(Sound.EXPLODE, org.bukkit.Sound.EXPLODE),
-    FIZZ(Sound.FIZZ, org.bukkit.Sound.FIZZ),
-    PORTAL_TRIGGER(Sound.PORTAL_TRIGGER, org.bukkit.Sound.PORTAL_TRIGGER),
-    ENDERDRAGON_GROWL(Sound.ENDERDRAGON_GROWL, org.bukkit.Sound.ENDERDRAGON_GROWL);
+    THUNDER(Sound.THUNDER, org.bukkit.Sound.ENTITY_LIGHTNING_THUNDER ),
+    ENDERMAN_TELEPORT(Sound.ENDERMAN_TELEPORT, org.bukkit.Sound.ENTITY_ENDERMEN_TELEPORT),
+    FIRE(Sound.FIRE, org.bukkit.Sound.BLOCK_FIRE_AMBIENT ),
+    EXPLODE(Sound.EXPLODE, org.bukkit.Sound.ENTITY_GENERIC_EXPLODE),
+    FIZZ(Sound.FIZZ, org.bukkit.Sound.ENTITY_CREEPER_PRIMED),
+    PORTAL_TRIGGER(Sound.PORTAL_TRIGGER, org.bukkit.Sound.BLOCK_PORTAL_TRIGGER),
+    ENDERDRAGON_GROWL(Sound.ENDERDRAGON_GROWL, org.bukkit.Sound.ENTITY_ENDERDRAGON_GROWL);
     
     private static final Map<Sound, org.bukkit.Sound> soundMap = new HashMap<Sound, org.bukkit.Sound>();
     private Sound apiSound;
